@@ -1,5 +1,6 @@
 package algorithms.mazeGenerators;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 
 public class Maze3d {
@@ -9,7 +10,7 @@ public class Maze3d {
 	public static final int WALL = 1;
 	public static final int PASS = 0;
 
-	private int[][][] m_maze;
+	private byte[][][] m_maze;
 	private static int DEFAULTSIZE = 5;
 
 	private int m_height;
@@ -28,17 +29,21 @@ public class Maze3d {
 	}
 
 	public Maze3d(int height, int width, int length) {
-		m_maze = new int[height][width][length];
+		m_maze = new byte[height][width][length];
 		m_height = height;
 		m_width = width;
 		m_length = length;
 	}
 
-	public Maze3d(int[][][] anArray) {
+	public Maze3d(byte[][][] anArray) {
 		m_maze = anArray.clone();
 		m_height = m_maze.length;
 		m_width = m_maze[0].length;
 		m_length = m_maze[0][0].length;
+	}
+	
+	public Maze3d(byte[] arr) {
+		buildMaze(arr);
 	}
 
 	public void printMaze() {
@@ -67,7 +72,7 @@ public class Maze3d {
 		return m_length;
 	}
 
-	public int[][][] getArray() {
+	public byte[][][] getArray() {
 		return m_maze;
 	}
 
@@ -229,5 +234,70 @@ public class Maze3d {
 		tmp = p.clone();
 		
 		return list;
+	}
+	
+	public byte[] toByteArray() {
+		/* Calculate how many bytes we need: 4 for each maze size (height, width, length)
+		 * 12 for entryPos, 12 for exitPos, then 1 for each cell: height*width*length
+		 * total: 36 + numOfCells
+		 */
+		int totalCells = m_height*m_width*m_length;
+		int totalSize = totalCells + 36;
+		byte[] byteArray = new byte[totalSize];
+		ByteBuffer buffer = ByteBuffer.wrap(byteArray);
+		buffer.put(utils.Utilities.intToByteArray(m_height));
+		buffer.put(utils.Utilities.intToByteArray(m_width));
+		buffer.put(utils.Utilities.intToByteArray(m_length));
+		
+		buffer.put(entryPosition.toByteArray());
+		buffer.put(exitPosition.toByteArray());
+		
+		for(int i=0;i<totalSize-36;i++)
+		{
+			int floor;
+			int cellsInFloor = m_width*m_length;
+			int cellNumInFloor;
+			int row;
+			int cellInRow;
+			floor = i / (cellsInFloor);
+			cellNumInFloor = i - (floor*cellsInFloor);
+			row = cellNumInFloor / m_length;
+			cellInRow = cellNumInFloor - (m_length*row);
+			
+			byteArray[36+i]=m_maze[floor][row][cellInRow];
+		}
+		
+		return byteArray;
+	}
+	
+	private void buildMaze(byte[] arr) {
+		ByteBuffer buff = ByteBuffer.wrap(arr);
+		m_height = buff.getInt();
+		m_width = buff.getInt();
+		m_length = buff.getInt();
+		
+		byte[] entryPosArray = new byte[12];
+		buff.get(entryPosArray, 0, 12);
+		entryPosition = new Position(entryPosArray);
+		
+		byte[] exitPosArray = new byte[12];
+		buff.get(exitPosArray, 0, 12);
+		exitPosition = new Position(exitPosArray);
+		
+		m_maze = new byte[m_height][m_width][m_length];
+		
+		for(int i=0;i<arr.length-36;i++) {
+			int floor;
+			int cellsInFloor = m_width*m_length;
+			int cellNumInFloor;
+			int row;
+			int cellInRow;
+			floor = i / (cellsInFloor);
+			cellNumInFloor = i - (floor*cellsInFloor);
+			row = cellNumInFloor / m_length;
+			cellInRow = cellNumInFloor - (m_length*row);
+			
+			m_maze[floor][row][cellInRow] = arr[i+36];
+		}
 	}
 }
