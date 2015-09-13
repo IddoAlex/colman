@@ -1,5 +1,7 @@
 package algorithms.mazeGenerators;
 
+import java.nio.ByteBuffer;
+
 public class Position {
 
 	private int m_height = 0;
@@ -14,6 +16,17 @@ public class Position {
 		m_height = height;
 		m_width = width;
 		m_length = length;
+	}
+	
+	public Position(byte[] arr)	{
+		buildPosition(arr);
+	}
+
+	private void buildPosition(byte[] arr) {
+		ByteBuffer buffer = ByteBuffer.wrap(arr);
+		m_height = buffer.getInt();
+		m_width = buffer.getInt();
+		m_length = buffer.getInt();
 	}
 
 	public int getHeight() {
@@ -131,11 +144,15 @@ public class Position {
 	}
 	
 	public byte[] toByteArray() {
-		byte[] byteArray = new byte[3];
-		byteArray[0]=(byte) m_height;
-		byteArray[1]=(byte) m_width;
-		byteArray[2]=(byte) m_length;
+		byte[] heightArr = utils.Utilities.intToByteArray(m_height);
+		byte[] widthArr = utils.Utilities.intToByteArray(m_width);
+		byte[] lengthArr = utils.Utilities.intToByteArray(m_length);
 		
-		return byteArray;
+		ByteBuffer buff = ByteBuffer.wrap(new byte[12]);
+		buff.put(heightArr);
+		buff.put(widthArr);
+		buff.put(lengthArr);
+		
+		return buff.array();
 	}
 }
