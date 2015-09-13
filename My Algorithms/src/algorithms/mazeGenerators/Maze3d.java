@@ -9,7 +9,7 @@ public class Maze3d {
 	public static final int WALL = 1;
 	public static final int PASS = 0;
 
-	private int[][][] m_maze;
+	private byte[][][] m_maze;
 	private static int DEFAULTSIZE = 5;
 
 	private int m_height;
@@ -28,17 +28,21 @@ public class Maze3d {
 	}
 
 	public Maze3d(int height, int width, int length) {
-		m_maze = new int[height][width][length];
+		m_maze = new byte[height][width][length];
 		m_height = height;
 		m_width = width;
 		m_length = length;
 	}
 
-	public Maze3d(int[][][] anArray) {
+	public Maze3d(byte[][][] anArray) {
 		m_maze = anArray.clone();
 		m_height = m_maze.length;
 		m_width = m_maze[0].length;
 		m_length = m_maze[0][0].length;
+	}
+	
+	public Maze3d(byte[] arr) {
+		buildMaze(arr);
 	}
 
 	public void printMaze() {
@@ -67,7 +71,7 @@ public class Maze3d {
 		return m_length;
 	}
 
-	public int[][][] getArray() {
+	public byte[][][] getArray() {
 		return m_maze;
 	}
 
@@ -229,5 +233,47 @@ public class Maze3d {
 		tmp = p.clone();
 		
 		return list;
+	}
+	
+	public byte[] toByteArray() {
+		/* Calculate how many bytes we need: 3 for maze size (height, width, length)
+		 * 3 for entryPos, 3 for exitPos, then 1 for each cell: height*width*length
+		 */
+		int totalCells = m_height*m_width*m_length;
+		byte[] byteArray = new byte[totalCells+9];
+		byteArray[0]=((byte)m_height);
+		byteArray[1]=((byte)m_width);
+		byteArray[2]=((byte)m_length);
+		
+		for(int i=0;i<3; i++)
+		{
+			byteArray[3+i] = entryPosition.toByteArray()[i];
+		}
+		
+		for(int i=0;i<3; i++)
+		{
+			byteArray[6+i] = exitPosition.toByteArray()[i];
+		}
+		
+		for(int i=0;i<totalCells-9;i++)
+		{
+			int floor;
+			int cellsInFloor = m_width*m_length;
+			int cellNumInFloor;
+			int row;
+			int cellInRow;
+			floor = i % (cellsInFloor);
+			cellNumInFloor = i - (floor*cellsInFloor);
+			row = cellNumInFloor % m_length;
+			cellInRow = cellNumInFloor - (m_length*row);
+			
+			byteArray[9+i]=m_maze[floor][row][cellInRow];
+		}
+		
+		return byteArray;
+	}
+	
+	private void buildMaze(byte[] arr) {
+		//TODO
 	}
 }

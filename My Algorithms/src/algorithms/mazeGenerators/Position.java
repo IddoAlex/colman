@@ -130,4 +130,12 @@ public class Position {
 		return result;
 	}
 	
+	public byte[] toByteArray() {
+		byte[] byteArray = new byte[3];
+		byteArray[0]=(byte) m_height;
+		byteArray[1]=(byte) m_width;
+		byteArray[2]=(byte) m_length;
+		
+		return byteArray;
+	}
 }
