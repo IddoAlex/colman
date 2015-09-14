@@ -2,6 +2,7 @@ package algorithms.mazeGenerators;
 
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 public class Maze3d {
 	/*
@@ -299,5 +300,48 @@ public class Maze3d {
 			
 			m_maze[floor][row][cellInRow] = arr[i+36];
 		}
+	}
+
+	@Override
+	public int hashCode() {
+		final int prime = 31;
+		int result = 1;
+		result = prime * result + ((entryPosition == null) ? 0 : entryPosition.hashCode());
+		result = prime * result + ((exitPosition == null) ? 0 : exitPosition.hashCode());
+		result = prime * result + m_height;
+		result = prime * result + m_length;
+		result = prime * result + Arrays.deepHashCode(m_maze);
+		result = prime * result + m_width;
+		return result;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null)
+			return false;
+		if (getClass() != obj.getClass())
+			return false;
+		Maze3d other = (Maze3d) obj;
+		if (entryPosition == null) {
+			if (other.entryPosition != null)
+				return false;
+		} else if (!entryPosition.equals(other.entryPosition))
+			return false;
+		if (exitPosition == null) {
+			if (other.exitPosition != null)
+				return false;
+		} else if (!exitPosition.equals(other.exitPosition))
+			return false;
+		if (m_height != other.m_height)
+			return false;
+		if (m_length != other.m_length)
+			return false;
+		if (!Arrays.deepEquals(m_maze, other.m_maze))
+			return false;
+		if (m_width != other.m_width)
+			return false;
+		return true;
 	}
 }
