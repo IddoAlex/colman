@@ -45,13 +45,4 @@ public class MyCompressorOutputStream extends OutputStream {
 		}
 		write(-1);
 	}
-
-	public void write(int[] arr) throws IOException {
-		this.first = true;
-		for (int i = 0; i < arr.length; i++) {
-			write(arr[i]);
-		}
-		write(-1); // Agreed int that represents end of array. 
-	}
-
 }
