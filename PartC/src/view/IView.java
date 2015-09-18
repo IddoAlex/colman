@@ -14,6 +14,8 @@ public interface IView {
 	public void setInputStream(InputStream input);
 	public void setOutputStream(OutputStream output);
 	
+	public void display(String text);
+	
 	public void start();
 
 }

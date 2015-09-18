@@ -1,10 +1,21 @@
 package view;
 
-public class MyView extends CommonView {
+import java.io.BufferedReader;
+import java.io.InputStreamReader;
+import java.io.PrintWriter;
 
+public class MyView extends CommonView {
+	BufferedReader in;
+	PrintWriter out;
+	
 	public MyView() {
-		in = System.in;
-		out = System.out;
+		in = new BufferedReader(new InputStreamReader(System.in));
+		out = new PrintWriter(System.out);
+	}
+
+	@Override
+	public void display(String text) {
+		out.println(text);
 	}
 
 

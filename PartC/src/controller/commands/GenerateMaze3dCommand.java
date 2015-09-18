@@ -1,5 +1,7 @@
 package controller.commands;
 
+import java.util.ArrayList;
+
 import model.IModel;
 import view.IView;
 
@@ -11,8 +13,15 @@ public class GenerateMaze3dCommand extends CommonCommand {
 
 	@Override
 	public void doCommand(String... args) {
-		// TODO Auto-generated method stub
-
+		String mazeName = args[0];
+		ArrayList<String> argu = new ArrayList<>();
+		
+		for(int i=1; i<args.length; i++) {
+			argu.add(args[i]);
+		}
+		String arguments = String.join(" ", argu);
+		
+		model.generateMaze3d(mazeName, arguments);
 	}
 
 }

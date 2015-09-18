@@ -15,15 +15,6 @@ public abstract class CommonView implements IView {
 	HashMap<String,ICommand> map;
 	CLI cli;
 	
-	public CommonView() {
-		
-	}
-	
-	public CommonView(InputStream input, OutputStream output) {
-		in = input;
-		out = output;
-	}
-
 	@Override
 	public void setController(IController aController) {
 		this.controller = aController;
@@ -35,7 +26,6 @@ public abstract class CommonView implements IView {
 		cli = new CLI(in, out, map);
 	}
 	
-
 	@Override
 	public void setInputStream(InputStream input) {
 		this.in=input;
@@ -50,5 +40,4 @@ public abstract class CommonView implements IView {
 	public void start() {
 		cli.start();
 	}
-	
 }
