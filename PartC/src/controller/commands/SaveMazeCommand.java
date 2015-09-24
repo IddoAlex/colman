@@ -1,5 +1,6 @@
 package controller.commands;
 
+import exceptions.ModelException;
 import model.IModel;
 import view.IView;
 
@@ -11,7 +12,12 @@ public class SaveMazeCommand extends CommonCommand {
 
 	@Override
 	public void doCommand(String... args) {
-		// TODO Auto-generated method stub
+		try {
+			model.saveMaze(args[0], args[1]);
+		} catch (ModelException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
 
 	}
 

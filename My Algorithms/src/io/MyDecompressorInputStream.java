@@ -2,10 +2,11 @@ package io;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 
 public class MyDecompressorInputStream extends InputStream {
 	InputStream in;
+	int currByte = 0;
+	int repeat = 0;
 
 	public MyDecompressorInputStream(InputStream aIn) {
 		in = aIn;
@@ -13,26 +14,16 @@ public class MyDecompressorInputStream extends InputStream {
 
 	@Override
 	public int read() throws IOException {
-		return in.read();
-	}
-	
-	@Override
-	public int read(byte[] b) throws IOException {
-		ByteBuffer buffer = ByteBuffer.wrap(b);
-
-		int count=0;
-		int num;
-		int occurrences;
-		
-		while((num=read())!=-1) // -1 represents end of array
-		{
-			occurrences = read();
-			for(int i=0;i<occurrences;i++) {
-				buffer.put((byte)num);
+		// if not end of file
+		if (currByte >= 0) {
+			if (repeat <= 0) {
+				// if no more times to repeat, get next byte and next amout to repeat
+				currByte = in.read();
+				repeat = in.read();
 			}
-			count++;
 		}
 		
-		return count;
+		repeat--;
+		return currByte;
 	}
 }

@@ -271,7 +271,7 @@ public class Maze3d {
 			row = cellNumInFloor / m_length;
 			cellInRow = cellNumInFloor - (m_length*row);
 			
-			byteArray[36+i]=m_maze[floor][row][cellInRow];
+			byteArray[i+36]=m_maze[floor][row][cellInRow];
 		}
 		
 		return byteArray;
