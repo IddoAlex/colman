@@ -8,5 +8,4 @@ public class MyController extends CommonController {
 	public MyController(IModel aModel, IView aView) {
 		super(aModel, aView);
 	}
-
 }

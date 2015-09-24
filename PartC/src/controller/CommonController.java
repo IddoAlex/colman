@@ -15,6 +15,7 @@ import controller.commands.MazeSizeCommand;
 import controller.commands.SaveMazeCommand;
 import controller.commands.SolveCommand;
 import model.IModel;
+import view.IDisplayable;
 import view.IView;
 
 public abstract class CommonController implements IController {
@@ -29,7 +30,10 @@ public abstract class CommonController implements IController {
 		model.setController(this);
 		view.setController(this);
 		
+		map = new HashMap<>(12);
 		initStringCommandMap();
+		
+		view.setStringCommandMap(map);
 	}
 
 	private void initStringCommandMap() {
@@ -45,4 +49,10 @@ public abstract class CommonController implements IController {
 		map.put("display solution", new DisplaySolutionCommand(view, model));
 		map.put("exit", new ExitCommand(view, model));
 	}
+	
+	@Override
+	public void display(IDisplayable displayable) {
+		view.display(displayable);
+	}
+	
 }

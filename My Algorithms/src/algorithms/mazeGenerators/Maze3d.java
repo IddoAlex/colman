@@ -48,17 +48,23 @@ public class Maze3d {
 	}
 
 	public void printMaze() {
+		System.out.println(m_maze.toString());
+	}
+
+	public String toString() {
+		String mazeString = "";
 		for (int i = 0; i < m_maze.length; i++) {
-			System.out.println("{");
+			mazeString += "{\n";
 			for (int j = 0; j < m_maze[0].length; j++) {
-				System.out.print("\t{ ");
+				mazeString += "\t{ ";
 				for (int k = 0; k < m_maze[0][0].length; k++) {
-					System.out.print(m_maze[i][j][k] + " ");
+					mazeString += m_maze[i][j][k] + " ";
 				}
-				System.out.println("},");
+				mazeString += "},\n";
 			}
-			System.out.println("},");
+			mazeString += "},\n";
 		}
+		return mazeString;
 	}
 
 	public int getHeight() {

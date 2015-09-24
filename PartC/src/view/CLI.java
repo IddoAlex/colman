@@ -26,15 +26,22 @@ public class CLI {
 	}
 
 	public void start() {
-
+		
+		out.println("Trying to open CLI thread...");
+		out.flush();
 		mainThread = new Thread(new Runnable() {
 			String line;
 			ICommand command;
 
 			@Override
 			public void run() {
+				out.println("Opened new CLI thread!");
+				out.flush();
 				try {
 					do {
+						out.println("\nEnter a command:");
+						out.flush();
+						
 						line = in.readLine();
 
 						String joined;
@@ -72,9 +79,12 @@ public class CLI {
 							command.doCommand(arguments);
 						} else {
 							out.println("Command '" + line + "' is invalid!");
+							out.flush();
 						}
 
 					} while (stayInLoop);
+					out.println("Exitting CLI thread...");
+					out.flush();
 
 				} catch (IOException e) {
 					e.printStackTrace();

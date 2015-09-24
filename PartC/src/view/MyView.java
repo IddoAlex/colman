@@ -5,18 +5,18 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 
 public class MyView extends CommonView {
-	BufferedReader in;
-	PrintWriter out;
+	BufferedReader reader;
+	PrintWriter writer;
 	
 	public MyView() {
-		in = new BufferedReader(new InputStreamReader(System.in));
-		out = new PrintWriter(System.out);
+		in = System.in;
+		reader = new BufferedReader(new InputStreamReader(in));
+		out = System.out;
+		writer = new PrintWriter(out);
 	}
 
 	@Override
-	public void display(String text) {
-		out.println(text);
+	public void display(IDisplayable displayable) {
+		displayable.display(out);
 	}
-
-
 }

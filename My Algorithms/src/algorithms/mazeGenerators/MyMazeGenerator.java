@@ -22,7 +22,6 @@ public class MyMazeGenerator extends CommonMaze3dGenerator {
 		maze.setEntryPosition(generateEdgePosition(maze));
 		maze.setExitPosition(generateEdgePosition(maze));
 		Position currp = maze.getStartPosition();
-//		maze.goalP=new Position (maze.startP);
 		Random rand = new Random();
 		poVisited = new boolean[x][y][z];
 
@@ -32,17 +31,16 @@ public class MyMazeGenerator extends CommonMaze3dGenerator {
 
 					poVisited[i][j][k] = false;
 				}
+		
 		poVisited[currp.getHeight()][currp.getWidth()][currp.getLength()] = true;
 		currp.visited = true;
-	//	poVisited[maze.getGoalPosition().getX()][maze.getGoalPosition().getY()][maze.getGoalPosition().getZ()] = true;
-	//	currp.visited = true;
 		stack.push(currp);
+		
 		while (!stack.isEmpty()&&visitedCells < totalCells) {
 			ArrayList<Position> neighbors = FindAllUnvisitedNeighbors(currp, maze);
 			if (neighbors.size() > 0) {
 				Position chosenNeighbor = neighbors.get(rand.nextInt(neighbors.size()));
 				chosenNeighbor.visited = true;
-	//			System.out.println(currp);
 				currp = chosenNeighbor;
 				poVisited[currp.getHeight()][currp.getWidth()][currp.getLength()] = true;
 				stack.push(currp);
@@ -52,8 +50,8 @@ public class MyMazeGenerator extends CommonMaze3dGenerator {
 				currp = stack.pop();
 				visitedCells++;
 			}
-
 		}
+		
 		maze.setPass(maze.getGoalPosition());
 		return maze;
 	}
@@ -84,9 +82,8 @@ public class MyMazeGenerator extends CommonMaze3dGenerator {
 			neighbors.add(new Position(currentPosition.getHeight(), currentPosition.getWidth() , currentPosition.getLength()-1));
 
 		}
-
+		
 		return neighbors;
-
 	}
 
 	private boolean checkVisited(int i,int j,int k)
@@ -114,8 +111,5 @@ public class MyMazeGenerator extends CommonMaze3dGenerator {
 		if (counter>1)
 			return false;
 		return true;
-		
 	}
-	
-
 }

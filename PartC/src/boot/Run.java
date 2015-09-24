@@ -11,7 +11,7 @@ public class Run {
 		MyView view = new MyView();
 		MyController controller = new MyController(model, view);
 		
-		
+		view.start();
 
 	}
 
