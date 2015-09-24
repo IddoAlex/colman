@@ -110,4 +110,8 @@ public class State<T> {
 	{
 		System.out.println(state.toString());
 	}
+	
+	public String toString() {
+		return state.toString();
+	}
 }

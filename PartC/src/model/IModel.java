@@ -18,4 +18,11 @@ public interface IModel {
 	public void saveMaze(String mazeName, String fileName) throws ModelException;
 
 	public void loadMaze(String fileName, String mazeName) throws ModelException;
+
+	public void mazeSize(String[] args) throws ModelException;
+
+	public void solve(String[] args) throws ModelException;
+
+	public void displaySolution(String[] args) throws ModelException;
+
 }

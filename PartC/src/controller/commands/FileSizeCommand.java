@@ -1,6 +1,11 @@
 package controller.commands;
 
+import java.io.File;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+
 import model.IModel;
+import view.IDisplayable;
 import view.IView;
 
 public class FileSizeCommand extends CommonCommand {
@@ -11,8 +16,31 @@ public class FileSizeCommand extends CommonCommand {
 
 	@Override
 	public void doCommand(String... args) {
-		// TODO Auto-generated method stub
+		String fileName = args[0];
+		try {
+			File file = new File(fileName);
+			long fileSize = file.length();
 
+			view.display(new IDisplayable() {
+
+				@Override
+				public void display(OutputStream out) {
+					PrintWriter writer = new PrintWriter(out);
+					writer.println("File size: " + fileSize);
+					writer.flush();
+				}
+			});
+		} catch (NullPointerException e) {
+			view.display(new IDisplayable() {
+
+				@Override
+				public void display(OutputStream out) {
+					PrintWriter writer = new PrintWriter(out);
+					writer.println(e.getMessage());
+					writer.flush();
+				}
+			});
+		}
 	}
 
 }

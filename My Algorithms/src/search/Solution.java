@@ -40,4 +40,14 @@ public class Solution<T> {
 			state.print();
 		}
 	}
+	
+	public String toString() {
+		String solutionString = "";
+		
+		for(State<T> state: list) {
+			solutionString += state.toString() +"\n";
+		}
+		
+		return solutionString;
+	}
 }
