@@ -19,13 +19,24 @@ import io.MyDecompressorInputStream;
 import search.Searcher;
 import search.Solution;
 import view.IDisplayable;
+import view.MyDisplayable;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class MyModel.
+ */
 public class MyModel extends CommonModel {
 
+	/**
+	 * Instantiates a new my model.
+	 */
 	public MyModel() {
 		super();
 	}
 
+	/* (non-Javadoc)
+	 * @see model.IModel#generateMaze3d(java.lang.String, java.lang.String)
+	 */
 	@Override
 	public void generateMaze3d(String mazeName, String arguments) throws GenerateException {
 		if (mazeName == null || mazeName.isEmpty()) {
@@ -57,6 +68,9 @@ public class MyModel extends CommonModel {
 		});
 	}
 
+	/* (non-Javadoc)
+	 * @see model.IModel#displayMaze(java.lang.String)
+	 */
 	@Override
 	public void displayMaze(String name) throws ModelException {
 
@@ -72,15 +86,19 @@ public class MyModel extends CommonModel {
 		});
 	}
 
+	/* (non-Javadoc)
+	 * @see model.IModel#displayCrossSection(java.lang.String[])
+	 */
 	@Override
 	public void displayCrossSection(String... args) throws CommandException, ModelException {
-		if (args.length != 4) {
+		String[] splitted = args[0].split(" ");
+		if (splitted.length != 4) {
 			throw new CommandException("Invalid number of arguments");
 		}
 
-		String section = args[0];
-		int index = Integer.parseInt(args[1]);
-		String mazeName = args[3];
+		String section = splitted[0];
+		int index = Integer.parseInt(splitted[1]);
+		String mazeName = splitted[3];
 
 		Maze3d maze = getMaze(mazeName);
 		int[][] crossSection;
@@ -117,12 +135,16 @@ public class MyModel extends CommonModel {
 		});
 	}
 
+	/* (non-Javadoc)
+	 * @see model.IModel#saveMaze(java.lang.String, java.lang.String)
+	 */
 	@Override
 	public void saveMaze(String mazeName, String fileName) throws ModelException {
 		Maze3d maze = getMaze(mazeName);
 
 		try {
-			MyCompressorOutputStream compressor = new MyCompressorOutputStream(new FileOutputStream(fileName));
+			FileOutputStream fos = new FileOutputStream(fileName) ;
+			MyCompressorOutputStream compressor = new MyCompressorOutputStream(fos);
 			compressor.write(maze.toByteArray());
 			compressor.close();
 		} catch (IOException e) {
@@ -130,6 +152,9 @@ public class MyModel extends CommonModel {
 		}
 	}
 
+	/* (non-Javadoc)
+	 * @see model.IModel#loadMaze(java.lang.String, java.lang.String)
+	 */
 	@Override
 	public void loadMaze(String fileName, String mazeName) throws ModelException {
 		try {
@@ -154,47 +179,45 @@ public class MyModel extends CommonModel {
 		} catch (IOException e) {
 			throw new ModelException("IO Error with file name.");
 		}
-
 	}
 
+	/* (non-Javadoc)
+	 * @see model.IModel#mazeSize(java.lang.String[])
+	 */
 	@Override
 	public void mazeSize(String[] args) throws ModelException {
 		String mazeName = args[0];
 		Maze3d maze = getMaze(mazeName);
 		int totalMazeSize;
 		totalMazeSize = maze.getHeight() * maze.getLength() * maze.getWidth() + 36;
-		controller.display(new IDisplayable() {
-
-			@Override
-			public void display(OutputStream out) {
-				PrintWriter writer = new PrintWriter(out);
-				writer.println("Maze '" + mazeName + "' total memory size: " + totalMazeSize + " bytes.");
-				writer.flush();
-			}
-		});
+		controller.display(new MyDisplayable("Maze '" + mazeName + "' total memory size: " + totalMazeSize + " bytes."));
 	}
 
+	/* (non-Javadoc)
+	 * @see model.IModel#solve(java.lang.String, java.lang.String)
+	 */
 	@Override
-	public void solve(String[] args) throws ModelException {
-		String mazeName = args[0];
-		String algorithmName = args[1];
+	public void solve(String name, String algorithm) throws ModelException {
 
-		Maze3d maze = getMaze(mazeName);
-		Searcher<Position> searcher = getAlgorithm(algorithmName);
+		Maze3d maze = getMaze(name);
+		Searcher<Position> searcher = getAlgorithm(algorithm);
 
-		solutionMap.put(mazeName, searcher.search(new Maze3dSearchable(maze)));
+		solutionMap.put(name, searcher.search(new Maze3dSearchable(maze)));
 
 		controller.display(new IDisplayable() {
 
 			@Override
 			public void display(OutputStream out) {
 				PrintWriter writer = new PrintWriter(out);
-				writer.println("solution for "+ mazeName + " is ready.");
+				writer.println("solution for "+ name + " is ready.");
 				writer.flush();
 			}
 		});
 	}
 	
+	/* (non-Javadoc)
+	 * @see model.IModel#displaySolution(java.lang.String[])
+	 */
 	@Override
 	public void displaySolution(String[] args) throws ModelException {
 		String mazeName = args[0];
@@ -214,6 +237,13 @@ public class MyModel extends CommonModel {
 		});
 	}
 
+	/**
+	 * Gets the maze.
+	 *
+	 * @param name the name
+	 * @return the maze
+	 * @throws ModelException the model exception
+	 */
 	private Maze3d getMaze(String name) throws ModelException {
 		Maze3d maze;
 		if (name == null || name.isEmpty()) {
@@ -228,6 +258,13 @@ public class MyModel extends CommonModel {
 		return maze;
 	}
 
+	/**
+	 * Gets the algorithm.
+	 *
+	 * @param algorithmName the algorithm name
+	 * @return the algorithm
+	 * @throws ModelException the model exception
+	 */
 	private Searcher<Position> getAlgorithm(String algorithmName) throws ModelException {
 		Searcher<Position> algorithm;
 		if (algorithmName == null || algorithmName.isEmpty()) {

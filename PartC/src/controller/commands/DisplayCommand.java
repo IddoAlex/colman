@@ -1,40 +1,37 @@
 package controller.commands;
 
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.util.ArrayList;
 
 import exceptions.ModelException;
 import model.IModel;
-import view.IDisplayable;
 import view.IView;
+import view.MyDisplayable;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class DisplayCommand.
+ */
 public class DisplayCommand extends CommonCommand {
 
+	/**
+	 * Instantiates a new display command.
+	 *
+	 * @param view the view
+	 * @param model the model
+	 */
 	public DisplayCommand(IView view, IModel model) {
 		super(view, model);
 	}
 
+	/* (non-Javadoc)
+	 * @see controller.commands.ICommand#doCommand(java.lang.String[])
+	 */
 	@Override
 	public void doCommand(String... args) {
-		ArrayList<String> buffer = new ArrayList<>();
-		for(int i=0;i<args.length;i++) {
-			buffer.add(args[i]);
-		}
-		
-		String name = String.join(" ", buffer);
 		try {
-			model.displayMaze(name);
+			model.displayMaze(args[0]);
 		} catch (ModelException e) {
-			view.display(new IDisplayable() {
-				
-				@Override
-				public void display(OutputStream out) {
-					PrintWriter writer = new PrintWriter(out);
-					writer.println(e.getMessage());
-					writer.flush();
-				}
-			});
+			view.display(new MyDisplayable(e.getMessage()));
 		}
 	}
 

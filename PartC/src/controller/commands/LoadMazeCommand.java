@@ -1,34 +1,45 @@
 package controller.commands;
 
-import java.io.OutputStream;
-import java.io.PrintWriter;
-
 import exceptions.ModelException;
 import model.IModel;
-import view.IDisplayable;
 import view.IView;
+import view.MyDisplayable;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class LoadMazeCommand.
+ */
 public class LoadMazeCommand extends CommonCommand {
 
+	/**
+	 * Instantiates a new load maze command.
+	 *
+	 * @param view the view
+	 * @param model the model
+	 */
 	public LoadMazeCommand(IView view, IModel model) {
 		super(view, model);
 	}
 
+	/* (non-Javadoc)
+	 * @see controller.commands.ICommand#doCommand(java.lang.String[])
+	 */
 	@Override
 	public void doCommand(String... args) {
-		try {
-			model.loadMaze(args[0], args[1]);
-		} catch (ModelException e) {
-			view.display(new IDisplayable() {
-
-				@Override
-				public void display(OutputStream out) {
-					PrintWriter writer = new PrintWriter(out);
-					writer.println(e.getMessage());
-					writer.flush();
+		// IO Command
+		String[] splitted = args[0].split(" ");
+		
+		executor.execute(new Runnable() {
+			
+			@Override
+			public void run() {
+				try {
+					model.loadMaze(splitted[0], splitted[1]);
+				} catch (ModelException e) {
+					view.display(new MyDisplayable(e.getMessage()));
 				}
-			});
-		}
+			}
+		});
 	}
 
 }

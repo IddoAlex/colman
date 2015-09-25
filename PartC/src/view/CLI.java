@@ -12,19 +12,43 @@ import java.util.List;
 
 import controller.commands.ICommand;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class CLI.
+ */
 public class CLI {
+	
+	/** The in. */
 	BufferedReader in;
+	
+	/** The out. */
 	PrintWriter out;
+	
+	/** The map. */
 	HashMap<String, ICommand> map;
+	
+	/** The main thread. */
 	Thread mainThread;
+	
+	/** The stay in loop. */
 	volatile boolean stayInLoop = true;
 
+	/**
+	 * Instantiates a new cli.
+	 *
+	 * @param input the input
+	 * @param output the output
+	 * @param aMap the a map
+	 */
 	public CLI(InputStream input, OutputStream output, HashMap<String, ICommand> aMap) {
 		this.in = new BufferedReader(new InputStreamReader(input));
 		this.out = new PrintWriter(output);
 		this.map = aMap;
 	}
 
+	/**
+	 * Start.
+	 */
 	public void start() {
 		
 		out.println("Trying to open CLI thread...");
@@ -72,7 +96,7 @@ public class CLI {
 							
 							String arguments = String.join(" ", joingArgStrings);
 
-							if (joined == "exit") {
+							if (joined.equals("exit")) {
 								stayInLoop = false;
 							}
 

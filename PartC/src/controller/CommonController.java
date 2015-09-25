@@ -18,11 +18,27 @@ import model.IModel;
 import view.IDisplayable;
 import view.IView;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class CommonController.
+ */
 public abstract class CommonController implements IController {
+	
+	/** The model. */
 	IModel model;
+	
+	/** The view. */
 	IView view;
+	
+	/** The map. */
 	HashMap<String,ICommand> map;
 	
+	/**
+	 * Instantiates a new common controller.
+	 *
+	 * @param aModel the a model
+	 * @param aView the a view
+	 */
 	public CommonController(IModel aModel, IView aView) {
 		this.model = aModel;
 		this.view = aView;
@@ -36,6 +52,9 @@ public abstract class CommonController implements IController {
 		view.setStringCommandMap(map);
 	}
 
+	/**
+	 * Inits the string command map.
+	 */
 	private void initStringCommandMap() {
 		map.put("dir", new DirCommand(view, model));
 		map.put("generate 3d maze", new GenerateMaze3dCommand(view, model));
@@ -50,6 +69,9 @@ public abstract class CommonController implements IController {
 		map.put("exit", new ExitCommand(view, model));
 	}
 	
+	/* (non-Javadoc)
+	 * @see controller.IController#display(view.IDisplayable)
+	 */
 	@Override
 	public void display(IDisplayable displayable) {
 		view.display(displayable);

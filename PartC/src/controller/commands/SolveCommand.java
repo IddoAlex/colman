@@ -1,40 +1,54 @@
 package controller.commands;
 
-import java.io.OutputStream;
-import java.io.PrintWriter;
+import java.util.ArrayList;
 
 import exceptions.ModelException;
 import model.IModel;
-import view.IDisplayable;
 import view.IView;
+import view.MyDisplayable;
 
+// TODO: Auto-generated Javadoc
+/**
+ * The Class SolveCommand.
+ */
 public class SolveCommand extends CommonCommand {
 
+	/**
+	 * Instantiates a new solve command.
+	 *
+	 * @param view the view
+	 * @param model the model
+	 */
 	public SolveCommand(IView view, IModel model) {
 		super(view, model);
 	}
 
+	/* (non-Javadoc)
+	 * @see controller.commands.ICommand#doCommand(java.lang.String[])
+	 */
 	@Override
 	public void doCommand(String... args) {
-		new Thread(new Runnable() {
+		String[] splitted = args[0].split(" ");
+		executor.execute(new Runnable() {
 			
 			@Override
 			public void run() {
+				ArrayList<String> buffer = new ArrayList<>();
+				String mazeName;
+				String algorithmName = splitted[splitted.length-1];
+				
+				for (int i = 0; i < splitted.length-1; i++) {
+					buffer.add(splitted[i]);
+				}
+				
+				mazeName = String.join(" ", buffer);
+				
 				try {
-					model.solve(args);
+					model.solve(mazeName,algorithmName);
 				} catch (ModelException e) {
-					view.display(new IDisplayable() {
-
-						@Override
-						public void display(OutputStream out) {
-							PrintWriter writer = new PrintWriter(out);
-							writer.println(e.getMessage());
-							writer.flush();
-						}
-					});
+					view.display(new MyDisplayable(e.getMessage()));
 				}
 			}
-		}).start();
+		});
 	}
-
 }
