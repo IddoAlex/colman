@@ -162,15 +162,19 @@ public class MyModel extends CommonModel {
 
 			byte[] initBytes = new byte[12];
 			decompressor.read(initBytes, 0, 12);
-			ByteBuffer buffer = ByteBuffer.wrap(initBytes);
+			ByteBuffer bufferInit = ByteBuffer.wrap(initBytes);
 
 			int height, width, length;
-			height = buffer.getInt();
-			width = buffer.getInt();
-			length = buffer.getInt();
+			height = bufferInit.getInt();
+			width = bufferInit.getInt();
+			length = bufferInit.getInt();
+			
+			int totalSize = height * width * length + 36;
 
-			byte[] totalBytes = new byte[height * width * length + 36];
-			decompressor.read(totalBytes);
+			byte[] totalBytes = new byte[totalSize];
+			ByteBuffer bufferTotal = ByteBuffer.wrap(totalBytes);
+			bufferTotal.put(initBytes);
+			decompressor.read(totalBytes, 12, totalSize-12);
 
 			Maze3d maze = new Maze3d(totalBytes);
 			map.put(mazeName, maze);
