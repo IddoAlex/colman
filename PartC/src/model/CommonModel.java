@@ -15,7 +15,7 @@ import search.Solution;
 /**
  * The Class CommonModel.
  */
-public abstract class CommonModel implements IModel {
+public abstract class CommonModel implements MVCModel {
 	
 	/** The default size. */
 	int DEFAULT_SIZE = 5;

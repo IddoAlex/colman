@@ -1,11 +1,7 @@
 package controller.commands;
 
 import java.io.File;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-
 import model.IModel;
-import view.IDisplayable;
 import view.IView;
 import view.MyDisplayable;
 

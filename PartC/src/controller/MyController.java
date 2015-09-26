@@ -1,7 +1,7 @@
 package controller;
 
-import model.IModel;
-import view.IView;
+import model.MVCModel;
+import view.MVCView;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -15,7 +15,7 @@ public class MyController extends CommonController {
 	 * @param aModel the a model
 	 * @param aView the a view
 	 */
-	public MyController(IModel aModel, IView aView) {
+	public MyController(MVCModel aModel, MVCView aView) {
 		super(aModel, aView);
 	}
 }
