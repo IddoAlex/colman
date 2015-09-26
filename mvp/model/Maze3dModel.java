@@ -3,40 +3,36 @@ package model;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
 import java.nio.ByteBuffer;
+import java.util.HashMap;
+import java.util.Observable;
 
 import algorithms.mazeGenerators.Maze3d;
 import algorithms.mazeGenerators.MyMazeGenerator;
 import algorithms.mazeGenerators.Position;
 import demo.Maze3dSearchable;
-import exceptions.CommandException;
-import exceptions.GenerateException;
-import exceptions.ModelException;
+import exceptions.*;
 import io.MyCompressorOutputStream;
 import io.MyDecompressorInputStream;
 import search.Searcher;
 import search.Solution;
-import view.IDisplayable;
-import view.MyDisplayable;
 
-// TODO: Auto-generated Javadoc
-/**
- * The Class MyModel.
- */
-public class MyModel extends CommonModel {
+public class Maze3dModel extends Observable implements MVPModel {
 
-	/**
-	 * Instantiates a new my model.
-	 */
-	public MyModel() {
-		super();
+	private static final int DEFAULT_SIZE = 5;
+	
+	HashMap<String, Maze3d> map;
+	
+	HashMap<String, Searcher<Position>> algorithmMap;
+	
+	HashMap<String, Solution<Position>> solutionMap;
+	
+	public Maze3dModel() {
+		map = new HashMap<>();
+		algorithmMap = new HashMap<>();
+		solutionMap = new HashMap<>();
 	}
 
-	/* (non-Javadoc)
-	 * @see model.IModel#generateMaze3d(java.lang.String, java.lang.String)
-	 */
 	@Override
 	public void generateMaze3d(String mazeName, String arguments) throws GenerateException {
 		if (mazeName == null || mazeName.isEmpty()) {
@@ -56,39 +52,16 @@ public class MyModel extends CommonModel {
 		}
 
 		map.put(mazeName, maze);
-
-		controller.display(new IDisplayable() {
-
-			@Override
-			public void display(OutputStream out) {
-				PrintWriter writer = new PrintWriter(out);
-				writer.println("Maze '" + mazeName + "' is ready");
-				writer.flush();
-			}
-		});
+		
+		//notifyObservers();
 	}
 
-	/* (non-Javadoc)
-	 * @see model.IModel#displayMaze(java.lang.String)
-	 */
 	@Override
 	public void displayMaze(String name) throws ModelException {
 
 		Maze3d maze = getMaze(name);
-		controller.display(new IDisplayable() {
-
-			@Override
-			public void display(OutputStream out) {
-				PrintWriter writer = new PrintWriter(out);
-				writer.println(maze.toString());
-				writer.flush();
-			}
-		});
 	}
 
-	/* (non-Javadoc)
-	 * @see model.IModel#displayCrossSection(java.lang.String[])
-	 */
 	@Override
 	public void displayCrossSection(String... args) throws CommandException, ModelException {
 		String[] splitted = args[0].split(" ");
@@ -115,29 +88,8 @@ public class MyModel extends CommonModel {
 		default:
 			throw new CommandException("Cannot get cross section by " + section);
 		}
-
-		controller.display(new IDisplayable() {
-
-			@Override
-			public void display(OutputStream out) {
-				PrintWriter writer = new PrintWriter(out);
-				for (int i = 0; i < crossSection.length; i++) {
-					writer.print("[ ");
-					for (int j = 0; j < crossSection[0].length; j++) {
-						writer.print(crossSection[i][j] + " ");
-					}
-
-					writer.println("]");
-				}
-
-				writer.flush();
-			}
-		});
 	}
 
-	/* (non-Javadoc)
-	 * @see model.IModel#saveMaze(java.lang.String, java.lang.String)
-	 */
 	@Override
 	public void saveMaze(String mazeName, String fileName) throws ModelException {
 		Maze3d maze = getMaze(mazeName);
@@ -152,9 +104,6 @@ public class MyModel extends CommonModel {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see model.IModel#loadMaze(java.lang.String, java.lang.String)
-	 */
 	@Override
 	public void loadMaze(String fileName, String mazeName) throws ModelException {
 		try {
@@ -185,21 +134,15 @@ public class MyModel extends CommonModel {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see model.IModel#mazeSize(java.lang.String[])
-	 */
 	@Override
 	public void mazeSize(String[] args) throws ModelException {
 		String mazeName = args[0];
 		Maze3d maze = getMaze(mazeName);
 		int totalMazeSize;
 		totalMazeSize = maze.getHeight() * maze.getLength() * maze.getWidth() + 36;
-		controller.display(new MyDisplayable("Maze '" + mazeName + "' total memory size: " + totalMazeSize + " bytes."));
+		//controller.display(new MyDisplayable("Maze '" + mazeName + "' total memory size: " + totalMazeSize + " bytes."));
 	}
 
-	/* (non-Javadoc)
-	 * @see model.IModel#solve(java.lang.String, java.lang.String)
-	 */
 	@Override
 	public void solve(String name, String algorithm) throws ModelException {
 
@@ -208,20 +151,9 @@ public class MyModel extends CommonModel {
 
 		solutionMap.put(name, searcher.search(new Maze3dSearchable(maze)));
 
-		controller.display(new IDisplayable() {
-
-			@Override
-			public void display(OutputStream out) {
-				PrintWriter writer = new PrintWriter(out);
-				writer.println("solution for "+ name + " is ready.");
-				writer.flush();
-			}
-		});
+		//controller.display(new IDisplayable() 
 	}
 	
-	/* (non-Javadoc)
-	 * @see model.IModel#displaySolution(java.lang.String[])
-	 */
 	@Override
 	public void displaySolution(String[] args) throws ModelException {
 		String mazeName = args[0];
@@ -230,24 +162,10 @@ public class MyModel extends CommonModel {
 			throw new ModelException("Solution for maze '" + mazeName + "' not found.");
 		}
 		
-		controller.display(new IDisplayable() {
+		//controller.display(new IDisplayable() {
 
-			@Override
-			public void display(OutputStream out) {
-				PrintWriter writer = new PrintWriter(out);
-				writer.println(solution.toString());
-				writer.flush();
-			}
-		});
 	}
 
-	/**
-	 * Gets the maze.
-	 *
-	 * @param name the name
-	 * @return the maze
-	 * @throws ModelException the model exception
-	 */
 	private Maze3d getMaze(String name) throws ModelException {
 		Maze3d maze;
 		if (name == null || name.isEmpty()) {
@@ -262,13 +180,6 @@ public class MyModel extends CommonModel {
 		return maze;
 	}
 
-	/**
-	 * Gets the algorithm.
-	 *
-	 * @param algorithmName the algorithm name
-	 * @return the algorithm
-	 * @throws ModelException the model exception
-	 */
 	private Searcher<Position> getAlgorithm(String algorithmName) throws ModelException {
 		Searcher<Position> algorithm;
 		if (algorithmName == null || algorithmName.isEmpty()) {
