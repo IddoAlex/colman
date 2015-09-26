@@ -1,6 +1,5 @@
 package model;
 
-import controller.IController;
 import exceptions.GenerateException;
 import exceptions.MVCException;
 import exceptions.ModelException;
@@ -11,13 +10,6 @@ import exceptions.ModelException;
  */
 public interface IModel {
 	
-	/**
-	 * Sets the controller.
-	 *
-	 * @param aController the new controller
-	 */
-	public void setController(IController aController);
-
 	/**
 	 * Generate maze3d.
 	 *

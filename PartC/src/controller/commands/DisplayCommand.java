@@ -1,7 +1,5 @@
 package controller.commands;
 
-import java.util.ArrayList;
-
 import exceptions.ModelException;
 import model.IModel;
 import view.IView;

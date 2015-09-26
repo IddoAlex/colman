@@ -14,9 +14,9 @@ import controller.commands.LoadMazeCommand;
 import controller.commands.MazeSizeCommand;
 import controller.commands.SaveMazeCommand;
 import controller.commands.SolveCommand;
-import model.IModel;
+import model.MVCModel;
 import view.IDisplayable;
-import view.IView;
+import view.MVCView;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -25,10 +25,10 @@ import view.IView;
 public abstract class CommonController implements IController {
 	
 	/** The model. */
-	IModel model;
+	MVCModel model;
 	
 	/** The view. */
-	IView view;
+	MVCView view;
 	
 	/** The map. */
 	HashMap<String,ICommand> map;
@@ -39,7 +39,7 @@ public abstract class CommonController implements IController {
 	 * @param aModel the a model
 	 * @param aView the a view
 	 */
-	public CommonController(IModel aModel, IView aView) {
+	public CommonController(MVCModel aModel, MVCView aView) {
 		this.model = aModel;
 		this.view = aView;
 		

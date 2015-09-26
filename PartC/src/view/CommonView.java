@@ -11,7 +11,7 @@ import controller.commands.ICommand;
 /**
  * The Class CommonView.
  */
-public abstract class CommonView implements IView {
+public abstract class CommonView implements MVCView {
 	
 	/** The in. */
 	InputStream in;
