@@ -6,6 +6,7 @@ import view.MyObservableView;
 
 public class Program {
 
+	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		MyObservableModel model = new MyObservableModel();
 		MyObservableView view = new MyObservableView();

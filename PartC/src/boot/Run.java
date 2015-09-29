@@ -15,6 +15,7 @@ public class Run {
 	 *
 	 * @param args the arguments
 	 */
+	@SuppressWarnings("unused")
 	public static void main(String[] args) {
 		MyModel model = new MyModel();
 		MyView view = new MyView();

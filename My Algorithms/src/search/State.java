@@ -30,6 +30,7 @@ public class State<T> {
 	/* (non-Javadoc)
 	 * @see java.lang.Object#equals(java.lang.Object)
 	 */
+	@SuppressWarnings("unchecked")
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
@@ -38,7 +39,7 @@ public class State<T> {
 			return false;
 		if (getClass() != obj.getClass())
 			return false;
-		State other = (State) obj;
+		State<T> other = (State<T>) obj;
 		if (state == null) {
 			if (other.state != null)
 				return false;

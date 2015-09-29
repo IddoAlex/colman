@@ -1,12 +1,6 @@
 package run;
 
-import java.util.HashSet;
-
-import algorithms.mazeGenerators.MyMaze3dGenerator;
-import algorithms.mazeGenerators.Position;
 import demo.Demo;
-import search.BFSSearcher;
-import search.State;
 
 public class Program {
 

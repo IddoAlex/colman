@@ -1,8 +1,11 @@
 package model;
 
+import algorithms.mazeGenerators.Maze3d;
+import algorithms.mazeGenerators.Position;
 import exceptions.GenerateException;
 import exceptions.MVCException;
 import exceptions.ModelException;
+import search.Solution;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -77,5 +80,11 @@ public interface IModel {
 	 * @throws ModelException the model exception
 	 */
 	public void displaySolution(String[] args) throws ModelException;
+	
+	public Maze3d getMaze(String mazeName) throws ModelException;
+	
+	public Solution<Position> getSolution(String mazeName) throws ModelException;
+
+	public void exit() throws ModelException;
 
 }

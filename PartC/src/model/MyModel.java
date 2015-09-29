@@ -248,7 +248,7 @@ public class MyModel extends CommonModel {
 	 * @return the maze
 	 * @throws ModelException the model exception
 	 */
-	private Maze3d getMaze(String name) throws ModelException {
+	public Maze3d getMaze(String name) throws ModelException {
 		Maze3d maze;
 		if (name == null || name.isEmpty()) {
 			throw new ModelException("No name given for maze");
@@ -281,5 +281,25 @@ public class MyModel extends CommonModel {
 		}
 
 		return algorithm;
+	}
+
+	@Override
+	public Solution<Position> getSolution(String mazeName) throws ModelException {
+		Solution<Position> solution;
+		if (mazeName == null || mazeName.isEmpty()) {
+			throw new ModelException("No name given for maze");
+		}
+
+		solution = solutionMap.get(mazeName);
+		if (solution == null) {
+			throw new ModelException("Maze named '" + mazeName + "' not found");
+		}
+
+		return solution;
+	}
+
+	@Override
+	public void exit() throws ModelException {
+		// Shouldn't do anything in MVC
 	}
 }
