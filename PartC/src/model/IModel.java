@@ -20,7 +20,7 @@ public interface IModel {
 	 * @param arguments the arguments
 	 * @throws GenerateException the generate exception
 	 */
-	public void generateMaze3d(String mazeName, String arguments) throws GenerateException;
+	public void generateMaze3d(String mazeName, String arguments) throws ModelException;
 
 	/**
 	 * Display maze.

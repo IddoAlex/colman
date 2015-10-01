@@ -8,6 +8,10 @@ import java.io.ObjectOutputStream;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Observable;
+import java.util.concurrent.Callable;
+import java.util.concurrent.ExecutionException;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Future;
 import java.util.zip.GZIPOutputStream;
 
 import algorithms.mazeGenerators.Maze3d;
@@ -15,7 +19,6 @@ import algorithms.mazeGenerators.MyMazeGenerator;
 import algorithms.mazeGenerators.Position;
 import demo.Maze3dSearchable;
 import exceptions.CommandException;
-import exceptions.GenerateException;
 import exceptions.ModelException;
 import io.MyCompressorOutputStream;
 import io.MyDecompressorInputStream;
@@ -31,31 +34,45 @@ public abstract class MVPModel extends Observable implements IModel {
 	HashMap<String, Searcher<Position>> algorithmMap;
 
 	HashMap<String, Solution<Position>> solutionMap;
+	
+	ExecutorService threadPool;
 
 	File mapsFile;
 
 	@Override
-	public void generateMaze3d(String mazeName, String arguments) throws GenerateException {
+	public void generateMaze3d(String mazeName, String arguments) throws ModelException {
 		if (mazeName == null || mazeName.isEmpty()) {
-			throw new GenerateException("No name given for maze");
+			throw new ModelException("No name given for maze");
 		}
 
-		Maze3d maze;
 		String[] parameters = arguments.split(" ");
+		
+		Future<Maze3d> futureMaze = threadPool.submit(new Callable<Maze3d>() {
+			Maze3d maze;
 
-		if (parameters.length == 3) {
-			int height = Integer.parseInt(parameters[0]);
-			int width = Integer.parseInt(parameters[1]);
-			int length = Integer.parseInt(parameters[2]);
-			maze = new MyMazeGenerator().generate(height, width, length);
-		} else {
-			maze = new MyMazeGenerator().generate(DEFAULT_SIZE, DEFAULT_SIZE, DEFAULT_SIZE);
+			@Override
+			public Maze3d call() throws Exception {
+				if (parameters.length == 3) {
+					int height = Integer.parseInt(parameters[0]);
+					int width = Integer.parseInt(parameters[1]);
+					int length = Integer.parseInt(parameters[2]);
+					maze = new MyMazeGenerator().generate(height, width, length);
+				} else {
+					maze = new MyMazeGenerator().generate(DEFAULT_SIZE, DEFAULT_SIZE, DEFAULT_SIZE);
+				}
+				return maze;
+			}
+		});
+
+
+		try {
+			map.put(mazeName, futureMaze.get());
+		} catch (InterruptedException | ExecutionException e) {
+			throw new ModelException("Generation maze exception occured");
 		}
-
-		map.put(mazeName, maze);
-
+		
 		setChanged();
-		notifyObservers("GENERATE: Maze " + mazeName + " was Generated.");
+		notifyObservers("GENERATE: Maze "+mazeName+" was Generated.");
 	}
 
 	@Override
@@ -159,21 +176,26 @@ public abstract class MVPModel extends Observable implements IModel {
 	}
 
 	@Override
-	public void solve(String mazeName, String algorithm) throws ModelException {
-		String notifyString;
+	public void solve(String name, String algorithm) throws ModelException {
 
-		if (solutionMap.containsKey(mazeName)) {
-			notifyString = "SOLVE: Solution for maze '" + mazeName + "' already exists.";
-		} else {
-			Maze3d maze = getMaze(mazeName);
-			Searcher<Position> searcher = getAlgorithm(algorithm);
+		Maze3d maze = getMaze(name);
+		Searcher<Position> searcher = getAlgorithm(algorithm);
+		Future<Solution<Position>> futureSolution = threadPool.submit(new Callable<Solution<Position>>() {
+			
+			@Override
+			public Solution<Position> call() throws Exception {
+				return searcher.search(new Maze3dSearchable(maze));
+			}
+		});
 
-			solutionMap.put(mazeName, searcher.search(new Maze3dSearchable(maze)));
-			notifyString = "SOLVE: Maze '" + mazeName + "' was solved.";
+		try {
+			solutionMap.put(name, futureSolution.get());
+		} catch (InterruptedException | ExecutionException e) {
+			throw new ModelException("Solving error occured.");
 		}
 
 		setChanged();
-		notifyObservers(notifyString);
+		notifyObservers("SOLVE: Maze '" + name + "' was solved.");
 	}
 
 	@Override

@@ -1,10 +1,7 @@
 package controller.commands;
 
 import java.util.ArrayList;
-import java.util.concurrent.Callable;
-
-import algorithms.mazeGenerators.Maze3d;
-import exceptions.CommandException;
+import exceptions.ModelException;
 import model.IModel;
 import view.IView;
 import view.MyDisplayable;
@@ -39,17 +36,15 @@ public class GenerateMaze3dCommand extends CommonCommand {
 		}
 		String arguments = String.join(" ", argu);
 
-		executor.submit(new Callable<Maze3d>() {
-
+		executor.execute(new Runnable() {
+			
 			@Override
-			public Maze3d call() throws Exception {
+			public void run() {
 				try {
 					model.generateMaze3d(mazeName, arguments);
-					return model.getMaze(mazeName);
-				} catch (CommandException e) {
+				} catch (ModelException e) {
 					view.display(new MyDisplayable(e.getMessage()));
 				}
-				return null;
 			}
 		});
 	}

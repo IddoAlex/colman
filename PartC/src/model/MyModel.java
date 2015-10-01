@@ -12,7 +12,6 @@ import algorithms.mazeGenerators.MyMazeGenerator;
 import algorithms.mazeGenerators.Position;
 import demo.Maze3dSearchable;
 import exceptions.CommandException;
-import exceptions.GenerateException;
 import exceptions.ModelException;
 import io.MyCompressorOutputStream;
 import io.MyDecompressorInputStream;
@@ -38,9 +37,9 @@ public class MyModel extends CommonModel {
 	 * @see model.IModel#generateMaze3d(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public void generateMaze3d(String mazeName, String arguments) throws GenerateException {
+	public void generateMaze3d(String mazeName, String arguments) throws ModelException {
 		if (mazeName == null || mazeName.isEmpty()) {
-			throw new GenerateException("No name given for maze");
+			throw new ModelException("No name given for maze");
 		}
 
 		Maze3d maze;
