@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<java version="1.8.0_51" class="java.beans.XMLDecoder">
+ <object class="java.util.HashMap">
+  <void method="put">
+   <string>key1</string>
+   <string>val1</string>
+  </void>
+  <void method="put">
+   <string>key2</string>
+   <string>val2</string>
+  </void>
+  <void method="put">
+   <string>key5</string>
+   <string>val5</string>
+  </void>
+  <void method="put">
+   <string>key3</string>
+   <string>val3</string>
+  </void>
+  <void method="put">
+   <string>key4</string>
+   <string>val4</string>
+  </void>
+ </object>
+</java>
