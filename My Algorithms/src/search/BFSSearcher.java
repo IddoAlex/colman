@@ -81,8 +81,6 @@ public class BFSSearcher<T> extends CommonSearcher<T> {
 								} else { // if it's already in open list, adjust it's cost and set parent
 									it.remove();
 									col.add(curr);
-									//curr.setCost(state.getCost());
-									//curr.setCameFrom(state.getCameFrom());
 								}
 							}
 						}
