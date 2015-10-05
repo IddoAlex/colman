@@ -9,7 +9,7 @@ import exceptions.ColmanException;
 import model.MyObservableModel;
 import presenter.MVPPresenter;
 import presenter.Properties;
-import view.MyObservableView;
+import view.MyObservableCLI;
 
 public class Program {
 

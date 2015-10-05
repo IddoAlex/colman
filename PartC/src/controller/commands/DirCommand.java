@@ -17,14 +17,18 @@ public class DirCommand extends CommonCommand {
 	/**
 	 * Instantiates a new dir command.
 	 *
-	 * @param view the view
-	 * @param model the model
+	 * @param view
+	 *            the view
+	 * @param model
+	 *            the model
 	 */
 	public DirCommand(IView view, IModel model) {
 		super(view, model);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see controller.commands.ICommand#doCommand(java.lang.String[])
 	 */
 	@Override
@@ -38,18 +42,31 @@ public class DirCommand extends CommonCommand {
 				File f = new File(args[0]);
 				File[] files = f.listFiles();
 				view.display(new IDisplayable() {
+					String message;
 
 					@Override
 					public void display(OutputStream out) {
 						PrintWriter writer = new PrintWriter(out);
 						if (files != null) {
 							for (File file : files) {
-								writer.println(file.getAbsolutePath());
+								message+=file.getAbsolutePath() + "\n";
 							}
 						} else {
-							writer.println("No files found.");
+							message+="No files found.";
 						}
+						
+						writer.println(getMessage());
 						writer.flush();
+					}
+
+					@Override
+					public void setMessage(String aMessage) {
+						this.message = aMessage;
+					}
+
+					@Override
+					public String getMessage() {
+						return message;
 					}
 				});
 			}

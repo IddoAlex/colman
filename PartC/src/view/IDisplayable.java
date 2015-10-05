@@ -15,4 +15,8 @@ public interface IDisplayable {
 	 */
 	void display(OutputStream out);
 
+	void setMessage(String aMessage);
+
+	String getMessage();
+
 }

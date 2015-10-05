@@ -27,7 +27,13 @@ public abstract class CommonDisplayable implements IDisplayable {
 	 *
 	 * @param aMessage the new message
 	 */
+	@Override
 	public void setMessage(String aMessage) {
 		this.message = aMessage;
+	}
+	
+	@Override
+	public String getMessage() {
+		return this.message;
 	}
 }

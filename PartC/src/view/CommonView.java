@@ -44,22 +44,6 @@ public abstract class CommonView implements MVCView {
 		this.map=map;
 		cli = new CLI(in, out, map);
 	}
-	
-	/* (non-Javadoc)
-	 * @see view.IView#setInputStream(java.io.InputStream)
-	 */
-	@Override
-	public void setInputStream(InputStream input) {
-		this.in=input;
-	}
-
-	/* (non-Javadoc)
-	 * @see view.IView#setOutputStream(java.io.OutputStream)
-	 */
-	@Override
-	public void setOutputStream(OutputStream output) {
-		this.out=output;
-	}
 
 	/* (non-Javadoc)
 	 * @see view.IView#start()

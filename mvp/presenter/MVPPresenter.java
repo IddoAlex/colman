@@ -46,7 +46,7 @@ public class MVPPresenter implements Observer {
 	@Override
 	public void update(Observable observable, Object arg) {
 		if (observable == view) {
-			analyzeLine(view.getNextLine());
+			analyzeLine((String)arg);
 		} else if (observable == model) {
 			analyzeObject(arg);
 		}
@@ -122,20 +122,32 @@ public class MVPPresenter implements Observer {
 			displayable = null; // so wouldn't print twice
 			
 			view.display(new IDisplayable() {
+				String message;
 
 				@Override
 				public void display(OutputStream out) {
 					PrintWriter writer = new PrintWriter(out);
 					for (int i = 0; i < crossSection.length; i++) {
-						writer.print("[ ");
+						message+="[ ";
 						for (int j = 0; j < crossSection[0].length; j++) {
-							writer.print(crossSection[i][j] + " ");
+							message+=crossSection[i][j] + " ";
 						}
 
-						writer.println("]");
+						message+="]\n";
 					}
-
+					
+					writer.println(getMessage());
 					writer.flush();
+				}
+
+				@Override
+				public void setMessage(String aMessage) {
+					this.message = aMessage;
+				}
+
+				@Override
+				public String getMessage() {
+					return message;
 				}
 			});
 		} 

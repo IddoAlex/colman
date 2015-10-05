@@ -56,15 +56,7 @@ public class MyModel extends CommonModel {
 
 		map.put(mazeName, maze);
 
-		controller.display(new IDisplayable() {
-
-			@Override
-			public void display(OutputStream out) {
-				PrintWriter writer = new PrintWriter(out);
-				writer.println("Maze '" + mazeName + "' is ready");
-				writer.flush();
-			}
-		});
+		controller.display(new MyDisplayable("Maze '" + mazeName + "' is ready"));
 	}
 
 	/* (non-Javadoc)
@@ -74,15 +66,7 @@ public class MyModel extends CommonModel {
 	public void displayMaze(String name) throws ModelException {
 
 		Maze3d maze = getMaze(name);
-		controller.display(new IDisplayable() {
-
-			@Override
-			public void display(OutputStream out) {
-				PrintWriter writer = new PrintWriter(out);
-				writer.println(maze.toString());
-				writer.flush();
-			}
-		});
+		controller.display(new MyDisplayable(maze.toString()));
 	}
 
 	/* (non-Javadoc)
@@ -116,20 +100,32 @@ public class MyModel extends CommonModel {
 		}
 
 		controller.display(new IDisplayable() {
+			String message;
 
 			@Override
 			public void display(OutputStream out) {
 				PrintWriter writer = new PrintWriter(out);
 				for (int i = 0; i < crossSection.length; i++) {
-					writer.print("[ ");
+					message+="[ ";
 					for (int j = 0; j < crossSection[0].length; j++) {
-						writer.print(crossSection[i][j] + " ");
+						message+=crossSection[i][j] + " ";
 					}
 
-					writer.println("]");
+					message+="]\n";
 				}
 
+				writer.println(getMessage());
 				writer.flush();
+			}
+
+			@Override
+			public void setMessage(String aMessage) {
+				this.message = aMessage;
+			}
+
+			@Override
+			public String getMessage() {
+				return message;
 			}
 		});
 	}
@@ -207,15 +203,7 @@ public class MyModel extends CommonModel {
 
 		solutionMap.put(name, searcher.search(new Maze3dSearchable(maze)));
 
-		controller.display(new IDisplayable() {
-
-			@Override
-			public void display(OutputStream out) {
-				PrintWriter writer = new PrintWriter(out);
-				writer.println("solution for "+ name + " is ready.");
-				writer.flush();
-			}
-		});
+		controller.display(new MyDisplayable("solution for "+ name + " is ready."));
 	}
 	
 	/* (non-Javadoc)
@@ -229,15 +217,7 @@ public class MyModel extends CommonModel {
 			throw new ModelException("Solution for maze '" + mazeName + "' not found.");
 		}
 		
-		controller.display(new IDisplayable() {
-
-			@Override
-			public void display(OutputStream out) {
-				PrintWriter writer = new PrintWriter(out);
-				writer.println(solution.toString());
-				writer.flush();
-			}
-		});
+		controller.display(new MyDisplayable(solution.toString()));
 	}
 
 	/**
