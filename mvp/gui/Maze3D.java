@@ -30,6 +30,7 @@ public class Maze3D extends MazeDisplayer {
         e.gc.fillPolygon(r);
 		
 	}
+	@SuppressWarnings("unused")
 	public Maze3D(Composite parent, int style) {
 		super(parent, style);
 		
