@@ -11,7 +11,9 @@ import java.util.Observable;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
+import java.util.concurrent.TimeUnit;
 import java.util.zip.GZIPOutputStream;
 
 import algorithms.mazeGenerators.Maze3d;
@@ -34,45 +36,45 @@ public abstract class MVPModel extends Observable implements IModel {
 	HashMap<String, Searcher<Position>> algorithmMap;
 
 	HashMap<String, Solution<Position>> solutionMap;
-	
+
 	ExecutorService threadPool;
 
 	File mapsFile;
 
 	@Override
-	public void generateMaze3d(String mazeName, String arguments) throws ModelException {
+	public void generateMaze3d(String mazeName, String arguments) {
 		if (mazeName == null || mazeName.isEmpty()) {
-			throw new ModelException("No name given for maze");
-		}
+			setChanged();
+			notifyObservers("EXCEPTION: No name given for maze");
+		} else {
+			String[] parameters = arguments.split(" ");
 
-		String[] parameters = arguments.split(" ");
-		
-		Future<Maze3d> futureMaze = threadPool.submit(new Callable<Maze3d>() {
-			Maze3d maze;
+			Future<Maze3d> futureMaze = threadPool.submit(new Callable<Maze3d>() {
+				Maze3d maze;
 
-			@Override
-			public Maze3d call() throws Exception {
-				if (parameters.length == 3) {
-					int height = Integer.parseInt(parameters[0]);
-					int width = Integer.parseInt(parameters[1]);
-					int length = Integer.parseInt(parameters[2]);
-					maze = new MyMazeGenerator().generate(height, width, length);
-				} else {
-					maze = new MyMazeGenerator().generate(DEFAULT_SIZE, DEFAULT_SIZE, DEFAULT_SIZE);
+				@Override
+				public Maze3d call() throws Exception {
+					if (parameters.length == 3) {
+						int height = Integer.parseInt(parameters[0]);
+						int width = Integer.parseInt(parameters[1]);
+						int length = Integer.parseInt(parameters[2]);
+						maze = new MyMazeGenerator().generate(height, width, length);
+					} else {
+						maze = new MyMazeGenerator().generate(DEFAULT_SIZE, DEFAULT_SIZE, DEFAULT_SIZE);
+					}
+					return maze;
 				}
-				return maze;
+			});
+
+			try {
+				map.put(mazeName, futureMaze.get());
+				setChanged();
+				notifyObservers("GENERATE: Maze " + mazeName + " was Generated.");
+			} catch (InterruptedException | ExecutionException e) {
+				setChanged();
+				notifyObservers("EXCEPTION: Generation maze exception occured");
 			}
-		});
-
-
-		try {
-			map.put(mazeName, futureMaze.get());
-		} catch (InterruptedException | ExecutionException e) {
-			throw new ModelException("Generation maze exception occured");
 		}
-		
-		setChanged();
-		notifyObservers("GENERATE: Maze "+mazeName+" was Generated.");
 	}
 
 	@Override
@@ -87,7 +89,7 @@ public abstract class MVPModel extends Observable implements IModel {
 	public void displayCrossSection(String... args) throws CommandException, ModelException {
 		String[] splitted = args[0].split(" ");
 		if (splitted.length != 4) {
-			throw new CommandException("Invalid number of arguments");
+			throw new CommandException("EXCEPTION: Invalid number of arguments");
 		}
 
 		String section = splitted[0];
@@ -107,7 +109,7 @@ public abstract class MVPModel extends Observable implements IModel {
 			crossSection = maze.getCrossSectionByZ(index);
 			break;
 		default:
-			throw new CommandException("Cannot get cross section by " + section);
+			throw new CommandException("EXCEPTION: Cannot get cross section by " + section);
 		}
 
 		setChanged();
@@ -115,53 +117,70 @@ public abstract class MVPModel extends Observable implements IModel {
 	}
 
 	@Override
-	public void saveMaze(String mazeName, String fileName) throws ModelException {
-		Maze3d maze = getMaze(mazeName);
-
-		try {
-			FileOutputStream fos = new FileOutputStream(fileName);
-			MyCompressorOutputStream compressor = new MyCompressorOutputStream(fos);
-			compressor.write(maze.toByteArray());
-			compressor.close();
-		} catch (IOException e) {
-			throw new ModelException("IO Error with file path.");
-		}
-
-		setChanged();
-		notifyObservers("SAVE: Maze '" + mazeName + "' was saved.");
+	public void saveMaze(String mazeName, String fileName) {
+		threadPool.execute(new Runnable() {
+			
+			@Override
+			public void run() {
+				
+				try {
+					Maze3d maze = getMaze(mazeName);
+					FileOutputStream fos = new FileOutputStream(fileName);
+					MyCompressorOutputStream compressor = new MyCompressorOutputStream(fos);
+					compressor.write(maze.toByteArray());
+					compressor.close();
+					setChanged();
+					notifyObservers("SAVE: Maze '" + mazeName + "' was saved.");
+				} catch (IOException e) {
+					setChanged();
+					notifyObservers("EXCEPTION: IO Error with file path.");
+				} catch (ModelException e) {
+					setChanged();
+					notifyObservers("EXCEPTION: "+e.getMessage());
+				}
+			}
+		});
 	}
 
 	@Override
-	public void loadMaze(String fileName, String mazeName) throws ModelException {
-		try {
-			MyDecompressorInputStream decompressor = new MyDecompressorInputStream(new FileInputStream(fileName));
+	public void loadMaze(String fileName, String mazeName) {
+		threadPool.execute(new Runnable() {
 
-			byte[] initBytes = new byte[12];
-			decompressor.read(initBytes, 0, 12);
-			ByteBuffer bufferInit = ByteBuffer.wrap(initBytes);
+			@Override
+			public void run() {
+				try {
+					MyDecompressorInputStream decompressor = new MyDecompressorInputStream(
+							new FileInputStream(fileName));
 
-			int height, width, length;
-			height = bufferInit.getInt();
-			width = bufferInit.getInt();
-			length = bufferInit.getInt();
+					byte[] initBytes = new byte[12];
+					decompressor.read(initBytes, 0, 12);
+					ByteBuffer bufferInit = ByteBuffer.wrap(initBytes);
 
-			int totalSize = height * width * length + 36;
+					int height, width, length;
+					height = bufferInit.getInt();
+					width = bufferInit.getInt();
+					length = bufferInit.getInt();
 
-			byte[] totalBytes = new byte[totalSize];
-			ByteBuffer bufferTotal = ByteBuffer.wrap(totalBytes);
-			bufferTotal.put(initBytes);
-			decompressor.read(totalBytes, 12, totalSize - 12);
+					int totalSize = height * width * length + 36;
 
-			Maze3d maze = new Maze3d(totalBytes);
-			map.put(mazeName, maze);
+					byte[] totalBytes = new byte[totalSize];
+					ByteBuffer bufferTotal = ByteBuffer.wrap(totalBytes);
+					bufferTotal.put(initBytes);
+					decompressor.read(totalBytes, 12, totalSize - 12);
 
-			decompressor.close();
-		} catch (IOException e) {
-			throw new ModelException("IO Error with file name.");
-		}
+					Maze3d maze = new Maze3d(totalBytes);
+					map.put(mazeName, maze);
 
-		setChanged();
-		notifyObservers("LOAD: Maze '" + mazeName + "' was loaded.");
+					decompressor.close();
+
+					setChanged();
+					notifyObservers("LOAD: Maze '" + mazeName + "' was loaded.");
+				} catch (IOException e) {
+					setChanged();
+					notifyObservers("EXCEPTION: IO Error with file name.");
+				}
+			}
+		});
 	}
 
 	@Override
@@ -181,7 +200,7 @@ public abstract class MVPModel extends Observable implements IModel {
 		Maze3d maze = getMaze(name);
 		Searcher<Position> searcher = getAlgorithm(algorithm);
 		Future<Solution<Position>> futureSolution = threadPool.submit(new Callable<Solution<Position>>() {
-			
+
 			@Override
 			public Solution<Position> call() throws Exception {
 				return searcher.search(new Maze3dSearchable(maze));
@@ -190,12 +209,12 @@ public abstract class MVPModel extends Observable implements IModel {
 
 		try {
 			solutionMap.put(name, futureSolution.get());
+			setChanged();
+			notifyObservers("SOLVE: Maze '" + name + "' was solved.");
 		} catch (InterruptedException | ExecutionException e) {
-			throw new ModelException("Solving error occured.");
+			setChanged();
+			notifyObservers("EXCEPTION: Solving error occured.");
 		}
-
-		setChanged();
-		notifyObservers("SOLVE: Maze '" + name + "' was solved.");
 	}
 
 	@Override
@@ -214,12 +233,12 @@ public abstract class MVPModel extends Observable implements IModel {
 	public Maze3d getMaze(String mazeName) throws ModelException {
 		Maze3d maze;
 		if (mazeName == null || mazeName.isEmpty()) {
-			throw new ModelException("No name given for maze");
+			throw new ModelException("EXCEPTION: No name given for maze");
 		}
 
 		maze = map.get(mazeName);
 		if (maze == null) {
-			throw new ModelException("Maze named '" + mazeName + "' not found");
+			throw new ModelException("EXCEPTION: Maze named '" + mazeName + "' not found");
 		}
 
 		return maze;
@@ -229,58 +248,106 @@ public abstract class MVPModel extends Observable implements IModel {
 	public Solution<Position> getSolution(String mazeName) throws ModelException {
 		Solution<Position> solution;
 		if (mazeName == null || mazeName.isEmpty()) {
-			throw new ModelException("No name given for maze");
+			throw new ModelException("EXCEPTION: No name given for maze");
 		}
 
 		solution = solutionMap.get(mazeName);
 		if (solution == null) {
-			throw new ModelException("Maze named '" + mazeName + "' not found");
+			throw new ModelException("EXCEPTION: Maze named '" + mazeName + "' not found");
 		}
 
 		return solution;
 	}
 
 	@Override
-	public void exit() throws ModelException {
-		// Save hashMaps before exiting
-		FileOutputStream fos = null;
-		ObjectOutputStream oos = null;
-		GZIPOutputStream gos = null;
+	public void exit() {
+
+		threadPool.execute(new Runnable() {
+			// Save hashMaps before exiting
+			FileOutputStream fos = null;
+			ObjectOutputStream oos = null;
+			GZIPOutputStream gos = null;
+
+			@Override
+			public void run() {
+				try {
+					fos = new FileOutputStream(mapsFile, true);
+					gos = new GZIPOutputStream(oos);
+					oos = new ObjectOutputStream(gos);
+
+					oos.writeObject(map);
+					oos.writeObject(algorithmMap);
+					oos.writeObject(solutionMap);
+					oos.flush();
+				} catch (IOException e) {
+					setChanged();
+					notifyObservers("EXCEPTION: IO Error while trying to save HashMaps.");
+				} finally {
+					try {
+						if (oos != null) {
+							oos.close();
+						}
+						if (fos != null) {
+							fos.close();
+						}
+					} catch (IOException e) {
+						setChanged();
+						notifyObservers("EXCEPTION: IO Error while trying to close output streams.");
+					}
+				}
+			}
+		});
+
+		threadPool.shutdown();
+		setChanged();
+		notifyObservers("Starting shutdown...");
 
 		try {
-			fos = new FileOutputStream(mapsFile, true);
-			gos = new GZIPOutputStream(oos);
-			oos = new ObjectOutputStream(gos);
-
-			oos.writeObject(map);
-			oos.writeObject(algorithmMap);
-			oos.writeObject(solutionMap);
-			oos.flush();
-		} catch (IOException e) {
-			throw new ModelException("IO Error while trying to save HashMaps.");
-		} finally {
-			try {
-				if (oos != null) {
-					oos.close();
-				}
-				if (fos != null) {
-					fos.close();
-				}
-			} catch (IOException e) {
-				throw new ModelException("IO Error while trying to close output streams.");
-			}
+			threadPool.awaitTermination(60, TimeUnit.SECONDS);
+			setChanged();
+			notifyObservers("Shutdown complete. Good-bye!");
+		} catch (InterruptedException e) {
+			setChanged();
+			notifyObservers("EXCEPTION: Awaiting termination interrupted");
 		}
+	}
+
+	@Override
+	public void setAmountThreads(int numThreads) {
+		if (threadPool == null) {
+			threadPool = Executors.newFixedThreadPool(numThreads);
+		}
+	}
+
+	@Override
+	public void getFileSize(String fileName) {
+
+		threadPool.execute(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					File file = new File(fileName);
+					long fileSize = file.length();
+					setChanged();
+					notifyObservers("File size: " + fileSize);
+				} catch (NullPointerException e) {
+					setChanged();
+					notifyObservers("EXCEPTION: "+e.getMessage());
+				}
+			}
+		});
 	}
 
 	private Searcher<Position> getAlgorithm(String algorithmName) throws ModelException {
 		Searcher<Position> algorithm;
 		if (algorithmName == null || algorithmName.isEmpty()) {
-			throw new ModelException("No name given for algorithm");
+			throw new ModelException("EXCEPTION: No name given for algorithm");
 		}
 
 		algorithm = algorithmMap.get(algorithmName);
 		if (algorithm == null) {
-			throw new ModelException("Maze named '" + algorithmName + "' not found");
+			throw new ModelException("EXCEPTION: Maze named '" + algorithmName + "' not found");
 		}
 
 		return algorithm;

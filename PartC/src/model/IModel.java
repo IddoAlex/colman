@@ -85,6 +85,10 @@ public interface IModel {
 	
 	public Solution<Position> getSolution(String mazeName) throws ModelException;
 
-	public void exit() throws ModelException;
+	public void exit();
+	
+	public void setAmountThreads(int numThreads);
+
+	public void getFileSize(String fileName) throws ModelException;
 
 }

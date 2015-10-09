@@ -278,7 +278,13 @@ public class MyModel extends CommonModel {
 	}
 
 	@Override
-	public void exit() throws ModelException {
+	public void exit() {
 		// Shouldn't do anything in MVC
+	}
+
+	@Override
+	public void getFileSize(String fileName) throws ModelException {
+		// TODO Auto-generated method stub
+		
 	}
 }

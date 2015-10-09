@@ -5,7 +5,6 @@ import java.util.ArrayList;
 import exceptions.ModelException;
 import model.IModel;
 import view.IView;
-import view.MyDisplayable;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -39,16 +38,8 @@ public class SaveMazeCommand extends CommonCommand {
 		
 		String mazeName = String.join(" ", buffer);
 		
-		executor.execute(new Runnable() {
-			
-			@Override
-			public void run() {
-				try {
-					model.saveMaze(mazeName, fileName);
-				} catch (ModelException e) {
-					view.display(new MyDisplayable(e.getMessage()));
-				}
-			}
-		});
+		try {
+			model.saveMaze(mazeName, fileName);
+		} catch (ModelException e) {}
 	}
 }

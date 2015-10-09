@@ -3,8 +3,6 @@ package boot;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-
-import controller.ControllerThreadPool;
 import exceptions.ColmanException;
 import model.MyObservableModel;
 import presenter.MVPPresenter;
@@ -31,7 +29,8 @@ public class Program {
 			solvingAlgorithm = prop.getProperty("Solving Algorithm");
 			generateAlgorithm = prop.getProperty("Generation Algorithm");
 			numThreads = Integer.parseInt(prop.getProperty("NumThreads"));
-			ControllerThreadPool.setNumThreadPools(numThreads);
+			//ControllerThreadPool.setNumThreadPools(numThreads);
+			// Instead, to call setNumThreads in the model
 		} catch (FileNotFoundException | ColmanException e) {
 			
 		}

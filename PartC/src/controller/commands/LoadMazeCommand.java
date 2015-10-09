@@ -3,7 +3,6 @@ package controller.commands;
 import exceptions.ModelException;
 import model.IModel;
 import view.IView;
-import view.MyDisplayable;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -29,17 +28,10 @@ public class LoadMazeCommand extends CommonCommand {
 		// IO Command
 		String[] splitted = args[0].split(" ");
 		
-		executor.execute(new Runnable() {
-			
-			@Override
-			public void run() {
-				try {
-					model.loadMaze(splitted[0], splitted[1]);
-				} catch (ModelException e) {
-					view.display(new MyDisplayable(e.getMessage()));
-				}
-			}
-		});
+		try {
+			model.loadMaze(splitted[0], splitted[1]);
+		} catch (ModelException e) {}
+
 	}
 
 }

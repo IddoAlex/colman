@@ -1,6 +1,9 @@
 package model;
 
 import java.util.HashMap;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+
 import algorithms.mazeGenerators.Maze3d;
 import algorithms.mazeGenerators.Position;
 import controller.IController;
@@ -32,6 +35,8 @@ public abstract class CommonModel implements MVCModel {
 	/** The solution map. */
 	HashMap<String, Solution<Position>> solutionMap;
 	
+	ExecutorService threadPool;
+	
 	/**
 	 * Instantiates a new common model.
 	 */
@@ -58,5 +63,12 @@ public abstract class CommonModel implements MVCModel {
 	@Override
 	public void setController(IController aController) {
 		this.controller = aController;
+	}
+	
+	@Override
+	public void setAmountThreads(int numThreads) {
+		if(threadPool == null) {
+			threadPool = Executors.newFixedThreadPool(numThreads);
+		}
 	}
 }

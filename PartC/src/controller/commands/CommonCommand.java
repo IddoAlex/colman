@@ -1,8 +1,5 @@
 package controller.commands;
 
-import java.util.concurrent.ExecutorService;
-
-import controller.ControllerThreadPool;
 import model.IModel;
 import view.IView;
 
@@ -18,9 +15,6 @@ public abstract class CommonCommand implements ICommand {
 	/** The model. */
 	IModel model;
 	
-	/** The executor. */
-	ExecutorService executor;
-
 	/**
 	 * Instantiates a new common command.
 	 *
@@ -30,6 +24,5 @@ public abstract class CommonCommand implements ICommand {
 	public CommonCommand(IView view, IModel model) {
 		this.view = view;
 		this.model = model;
-		executor = ControllerThreadPool.getExecutor();
 	}
 }

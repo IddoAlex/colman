@@ -35,7 +35,7 @@ public class DirCommand extends CommonCommand {
 	public void doCommand(String... args) {
 		// IO Command, so execute in a thread.
 
-		executor.execute(new Runnable() {
+		new Thread(new Runnable() {
 
 			@Override
 			public void run() {
@@ -70,7 +70,7 @@ public class DirCommand extends CommonCommand {
 					}
 				});
 			}
-		});
+		}).start();
 	}
 
 }

@@ -1,9 +1,8 @@
 package controller.commands;
 
-import java.io.File;
+import exceptions.ModelException;
 import model.IModel;
 import view.IView;
-import view.MyDisplayable;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -29,22 +28,8 @@ public class FileSizeCommand extends CommonCommand {
 		// IO Command
 
 		String fileName = args[0];
-		MyDisplayable displayable = new MyDisplayable();
-
-		executor.execute(new Runnable() {
-
-			@Override
-			public void run() {
-				try {
-					File file = new File(fileName);
-					long fileSize = file.length();
-					displayable.setMessage("File size: " + fileSize);
-					view.display(displayable);
-				} catch (NullPointerException e) {
-					displayable.setMessage(e.getMessage());
-					view.display(displayable);
-				}
-			}
-		});
+		try {
+			model.getFileSize(fileName);
+		} catch (ModelException e) {}
 	}
 }

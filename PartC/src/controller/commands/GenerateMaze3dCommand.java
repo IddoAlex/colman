@@ -4,7 +4,6 @@ import java.util.ArrayList;
 import exceptions.ModelException;
 import model.IModel;
 import view.IView;
-import view.MyDisplayable;
 
 // TODO: Auto-generated Javadoc
 /**
@@ -36,16 +35,8 @@ public class GenerateMaze3dCommand extends CommonCommand {
 		}
 		String arguments = String.join(" ", argu);
 
-		executor.execute(new Runnable() {
-			
-			@Override
-			public void run() {
-				try {
-					model.generateMaze3d(mazeName, arguments);
-				} catch (ModelException e) {
-					view.display(new MyDisplayable(e.getMessage()));
-				}
-			}
-		});
+		try {
+			model.generateMaze3d(mazeName, arguments);
+		} catch (ModelException e) {}
 	}
 }

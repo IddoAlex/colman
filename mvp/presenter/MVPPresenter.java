@@ -46,9 +46,9 @@ public class MVPPresenter implements Observer {
 	@Override
 	public void update(Observable observable, Object arg) {
 		if (observable == view) {
-			analyzeLine((String)arg);
+			analyzeViewUpdate((String)arg);
 		} else if (observable == model) {
-			analyzeObject(arg);
+			analyzeModelUpdate(arg);
 		}
 	}
 
@@ -66,7 +66,7 @@ public class MVPPresenter implements Observer {
 		map.put("exit", new ExitCommand(view, model));
 	}
 
-	private void analyzeLine(String line) {
+	private void analyzeViewUpdate(String line) {
 		ICommand command;
 		String joined;
 		String[] splitted = line.split("\\s+");
@@ -102,7 +102,7 @@ public class MVPPresenter implements Observer {
 		}
 	}
 	
-	private void analyzeObject(Object arg) {
+	private void analyzeModelUpdate(Object arg) {
 		MyDisplayable displayable = new MyDisplayable();
 		
 		if(arg instanceof Maze3d) {

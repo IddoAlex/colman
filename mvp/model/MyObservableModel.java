@@ -9,7 +9,6 @@ import java.util.zip.GZIPInputStream;
 
 import algorithms.mazeGenerators.Maze3d;
 import algorithms.mazeGenerators.Position;
-import controller.ControllerThreadPool;
 import search.AstarSearcher;
 import search.BFSSearcher;
 import search.MazeAirHeuristic;
@@ -20,7 +19,6 @@ import search.Solution;
 public class MyObservableModel extends MVPModel {
 	
 	public MyObservableModel() {
-		threadPool = ControllerThreadPool.getExecutor();
 		mapsFile = new File("maps.bin");
 		initModel();
 	}
