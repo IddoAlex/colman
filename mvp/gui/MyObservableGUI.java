@@ -1,5 +1,6 @@
 package gui;
 
+import java.io.File;
 import java.util.Observable;
 import java.util.Observer;
 
@@ -8,32 +9,78 @@ import view.MVPView;
 
 public class MyObservableGUI extends MVPView implements Observer {
 
-		MazeWindow win;
+	MazeWindow win;
+
+	public MyObservableGUI() {
+		win = new MazeWindow("Maze Puzzle", 500, 300);
+		win.addObserver(this);
+	}
+
+	@Override
+	public void start() {
+		win.run();
+	}
+
+	@Override
+	public void display(IDisplayable displayable) {
+		String message = displayable.getMessage();
+		String reason = message.split(":")[0];
+		if (reason.toLowerCase().equals("exception")) {
+			MessageBoxCreator.createErrorMessageBox(win.shell, message);
+		} else {
+			MessageBoxCreator.createNotificationMessageBox(win.shell, message);
+		}
+	}
+
+	@Override
+	public void update(Observable observable, Object arg) {
+		String notifiedString = "";
+		String line = (String) arg;
+		String[] splitted = line.split(":");
+		String type;
+		String argument;
 		
-		public MyObservableGUI() {
-			 win = new MazeWindow("Maze Puzzle", 500, 300);
-			 win.addObserver(this);
+		if (splitted.length > 1) {
+			type = splitted[0];
+			argument = splitted[1];
+		} else {
+			type = line;
+			argument = null;
 		}
 
-		@Override
-		public void start() {
-			win.run();
+		String fileName;
+		String mazeName;
+		File file;
+		
+		switch (type.toLowerCase()) {
+		case "property":
+			fileName = line.split(":")[1];
+			System.out.println(fileName);
+			// notifyObservers(arg);
+			break;
+		case "save":
+			file = new File(argument);
+			fileName = file.getName();
+			mazeName = fileName.split(".")[0];
+			notifiedString = "save maze " + mazeName + " " + argument;
+			break;
+		case "load":
+			file = new File(argument);
+			fileName = file.getName();
+			mazeName = fileName.split(".")[0];
+			notifiedString = "load maze " + argument + " " + mazeName;
+			break;
+		case "generate":
+			notifiedString = "generate 3d maze " + argument;
+			break;
+		case "solve":
+		case "exit":
+			break;
+		default:
+			break;
 		}
-
-		@Override
-		public void display(IDisplayable displayable) {
-			// TODO
-		}
-
-		@Override
-		public void update(Observable observable, Object arg) {
-			String argument = (String)arg;
-			String type = argument.split(":")[0];
-			switch(type.toLowerCase()) {
-			case "property":
-				String fileName = argument.split(":")[1];
-				notifyObservers(arg);
-				break;
-			}
-		}
+		
+		setChanged();
+		notifyObservers(notifiedString);
+	}
 }
