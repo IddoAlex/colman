@@ -5,6 +5,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import view.IDisplayable;
+import view.IMazeDisplayable;
 import view.MVPView;
 
 public class MyObservableGUI extends MVPView implements Observer {
@@ -23,12 +24,17 @@ public class MyObservableGUI extends MVPView implements Observer {
 
 	@Override
 	public void display(IDisplayable displayable) {
-		String message = displayable.getMessage();
-		String reason = message.split(":")[0];
-		if (reason.toLowerCase().equals("exception")) {
-			MessageBoxCreator.createErrorMessageBox(win.shell, message);
+		if (displayable instanceof IMazeDisplayable) {
+			IMazeDisplayable mazeDisplayable = (IMazeDisplayable) displayable;
+			win.setMazeData(mazeDisplayable.getMazeCrossSection());
 		} else {
-			MessageBoxCreator.createNotificationMessageBox(win.shell, message);
+			String message = displayable.getMessage();
+			String reason = message.split(":")[0];
+			if (reason.toLowerCase().equals("exception")) {
+				MessageBoxCreator.createErrorMessageBox(win.shell, message);
+			} else {
+				MessageBoxCreator.createNotificationMessageBox(win.shell, message);
+			}
 		}
 	}
 
@@ -39,7 +45,7 @@ public class MyObservableGUI extends MVPView implements Observer {
 		String[] splitted = line.split(":");
 		String type;
 		String argument;
-		
+
 		if (splitted.length > 1) {
 			type = splitted[0];
 			argument = splitted[1];
@@ -51,7 +57,7 @@ public class MyObservableGUI extends MVPView implements Observer {
 		String fileName;
 		String mazeName;
 		File file;
-		
+
 		switch (type.toLowerCase()) {
 		case "property":
 			fileName = line.split(":")[1];
@@ -79,7 +85,7 @@ public class MyObservableGUI extends MVPView implements Observer {
 		default:
 			break;
 		}
-		
+
 		setChanged();
 		notifyObservers(notifiedString);
 	}

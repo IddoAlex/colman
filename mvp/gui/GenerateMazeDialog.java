@@ -6,15 +6,11 @@ import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Dialog;
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
-public class GenerateMazeDialog extends Dialog {
-	Shell shell;
-	int retVal;
+public class GenerateMazeDialog extends BasicDialog {
 
 	String mazeName;
 	int mazeHeight;
@@ -45,10 +41,11 @@ public class GenerateMazeDialog extends Dialog {
 		retVal = SWT.CANCEL; // default
 	}
 
-	private void initWidgets() {
+	@Override
+	protected void initWidgets() {
 		shell = new Shell(getParent(), SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
 		shell.setLayout(new GridLayout(12, true));
-		shell.setSize(300, 200);
+		//shell.setSize(300, 200);
 		shell.setText("Generate maze");
 
 		nameLabel = new Label(shell, SWT.NULL);
@@ -151,21 +148,6 @@ public class GenerateMazeDialog extends Dialog {
 		this.mazeLength = length;
 	}
 
-	public int open() {
-		initWidgets();
-		shell.open();
-		shell.layout();
-
-		Display display = getParent().getDisplay();
-		while (!shell.isDisposed()) {
-			if (!display.readAndDispatch()) {
-				display.sleep();
-			}
-		}
-
-		return retVal;
-	}
-
 	private boolean trySetMembers() {
 		try {
 			this.mazeHeight = Integer.parseInt(heightText.getText());
@@ -178,4 +160,6 @@ public class GenerateMazeDialog extends Dialog {
 		mazeName = nameText.getText();
 		return (mazeName!=null && mazeName != "");
 	}
+
+	
 }

@@ -18,6 +18,7 @@ import io.MyDecompressorInputStream;
 import search.Searcher;
 import search.Solution;
 import view.IDisplayable;
+import view.IMazeDisplayable;
 import view.MyDisplayable;
 
 // TODO: Auto-generated Javadoc
@@ -99,7 +100,7 @@ public class MyModel extends CommonModel {
 			throw new CommandException("Cannot get cross section by " + section);
 		}
 
-		controller.display(new IDisplayable() {
+		controller.display(new IMazeDisplayable() {
 			String message;
 
 			@Override
@@ -126,6 +127,11 @@ public class MyModel extends CommonModel {
 			@Override
 			public String getMessage() {
 				return message;
+			}
+
+			@Override
+			public int[][] getMazeCrossSection() {
+				return crossSection;
 			}
 		});
 	}

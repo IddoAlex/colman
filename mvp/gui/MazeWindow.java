@@ -12,7 +12,6 @@ import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
-import org.eclipse.swt.widgets.MessageBox;
 
 public class MazeWindow extends BasicWindow {
 	Menu menuBar;
@@ -37,6 +36,8 @@ public class MazeWindow extends BasicWindow {
 	Button solveButton;
 	Button exitButton;
 
+	MazeDisplayer maze;
+	
 	SelectionListener exitSelectionListener;
 	
 	ObservableMember observable;
@@ -110,7 +111,7 @@ public class MazeWindow extends BasicWindow {
 		generateButton.setText("Generate");
 		generateButton.setLayoutData(new GridData(SWT.FILL, SWT.None, false, false, 1, 1));
 
-		MazeDisplayer maze = new Maze3D(shell, SWT.BORDER);
+		maze = new Maze3D(shell, SWT.BORDER);
 		maze.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 3));
 		
 		solveButton = new Button(shell, SWT.PUSH);
@@ -249,5 +250,9 @@ public class MazeWindow extends BasicWindow {
 		});
 		
 		fileExitItem.addSelectionListener(exitSelectionListener);
+	}
+
+	public void setMazeData(int[][] crossSection) {
+		maze.setMazeData(crossSection);
 	}
 }

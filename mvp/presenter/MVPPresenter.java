@@ -24,6 +24,7 @@ import controller.commands.SolveCommand;
 import model.MVPModel;
 import search.Solution;
 import view.IDisplayable;
+import view.IMazeDisplayable;
 import view.MVPView;
 import view.MyDisplayable;
 
@@ -121,7 +122,7 @@ public class MVPPresenter implements Observer {
 			int[][] crossSection = (int[][]) arg;
 			displayable = null; // so wouldn't print twice
 			
-			view.display(new IDisplayable() {
+			view.display(new IMazeDisplayable() {
 				String message;
 
 				@Override
@@ -148,6 +149,11 @@ public class MVPPresenter implements Observer {
 				@Override
 				public String getMessage() {
 					return message;
+				}
+
+				@Override
+				public int[][] getMazeCrossSection() {
+					return crossSection;
 				}
 			});
 		} 

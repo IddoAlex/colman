@@ -18,5 +18,4 @@ public interface IDisplayable {
 	void setMessage(String aMessage);
 
 	String getMessage();
-
 }
