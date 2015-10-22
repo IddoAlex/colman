@@ -9,6 +9,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -35,6 +36,11 @@ public class MazeWindow extends BasicWindow {
 	Button generateButton;
 	Button solveButton;
 	Button exitButton;
+	
+	Group sectionGroup;
+	Button xSectionButton;
+	Button ySectionButton;
+	Button zSectionButton;
 
 	MazeDisplayer maze;
 	
@@ -112,11 +118,26 @@ public class MazeWindow extends BasicWindow {
 		generateButton.setLayoutData(new GridData(SWT.FILL, SWT.None, false, false, 1, 1));
 
 		maze = new Maze3D(shell, SWT.BORDER);
-		maze.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 3));
+		maze.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 5));
 		
 		solveButton = new Button(shell, SWT.PUSH);
 		solveButton.setText("Solve");
 		solveButton.setLayoutData(new GridData(SWT.FILL, SWT.None, false, false, 1, 1));
+		
+		sectionGroup = new Group(shell, SWT.SHADOW_IN);
+		sectionGroup.setText("Display Section");
+		sectionGroup.setLayout(new GridLayout(1,true));
+		sectionGroup.setLayoutData(new GridData(SWT.FILL,SWT.NONE,false,false,1,2));
+		
+	    xSectionButton = new Button(sectionGroup, SWT.RADIO);
+	    xSectionButton.setText("X");
+	    xSectionButton.setLayoutData(new GridData(SWT.FILL, SWT.None, false, false, 1, 1));
+	    ySectionButton = new Button(sectionGroup, SWT.RADIO);
+	    ySectionButton.setText("Y");
+	    ySectionButton.setLayoutData(new GridData(SWT.FILL, SWT.None, false, false, 1, 1));
+	    zSectionButton = new Button(sectionGroup, SWT.RADIO);
+	    zSectionButton.setText("Z");
+	    zSectionButton.setLayoutData(new GridData(SWT.FILL, SWT.None, false, false, 1, 1));
 
 		exitButton = new Button(shell, SWT.PUSH);
 		exitButton.setText("Exit");
