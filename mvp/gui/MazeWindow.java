@@ -1,15 +1,14 @@
 package gui;
 
-import java.util.Observer;
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.layout.RowLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Event;
-import org.eclipse.swt.widgets.FileDialog;
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
@@ -32,25 +31,29 @@ public class MazeWindow extends BasicWindow {
 	String propertyFile;
 	String saveMazeFile;
 	String loadMazeFile;
-	
+
 	Button generateButton;
 	Button solveButton;
 	Button exitButton;
-	
+
 	Group sectionGroup;
 	Button xSectionButton;
 	Button ySectionButton;
 	Button zSectionButton;
 
+	Composite positionsComposite;
+	Label currPositionLabel;
+	Label currPositionText;
+	Label goalPositionLabel;
+	Label goalPositionText;
+
 	MazeDisplayer maze;
-	
+
 	SelectionListener exitSelectionListener;
-	
-	ObservableMember observable;
 
 	public MazeWindow(String title, int width, int height) {
 		super(title, width, height);
-		observable = new ObservableMember();
+		actualInitWidgets();
 	}
 
 	@Override
@@ -88,192 +91,130 @@ public class MazeWindow extends BasicWindow {
 		helpAboutItem.setText("About");
 
 		shell.setMenuBar(menuBar);
-		
-		shell.addListener(SWT.Close, new Listener()
-	    {
-	        public void handleEvent(Event event)
-	        {
-	        	int retVal;
-	            retVal = MessageBoxCreator.createMessageBox(shell, SWT.APPLICATION_MODAL | SWT.YES | SWT.NO, "Confirmation", "Are you sure?");
-	            event.doit = retVal == SWT.YES;
-	            if(event.doit) {
-	            	observable.changeAndNotifyObservers("EXIT");
-	            }
-	        }
-	    });
 
-		exitSelectionListener = new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent arg0) {
-				shell.close();
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-		};
-		
 		generateButton = new Button(shell, SWT.PUSH);
 		generateButton.setText("Generate");
 		generateButton.setLayoutData(new GridData(SWT.FILL, SWT.None, false, false, 1, 1));
 
-		maze = new Maze3D(shell, SWT.BORDER);
-		maze.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 5));
-		
+		positionsComposite = new Composite(shell, SWT.BORDER_SOLID);
+		positionsComposite.setLayoutData(new GridData(SWT.FILL, SWT.NONE, true, false, 1, 1));
+		positionsComposite.setLayout(new RowLayout());
+
+		currPositionLabel = new Label(positionsComposite, SWT.NONE);
+		currPositionLabel.setText("Current: ");
+
+		currPositionText = new Label(positionsComposite, SWT.NONE);
+		currPositionText.setText("N\\A");
+
+		goalPositionLabel = new Label(positionsComposite, SWT.NONE);
+		goalPositionLabel.setText("Goal: ");
+
+		goalPositionText = new Label(positionsComposite, SWT.NONE);
+		goalPositionText.setText("N\\A");
+
 		solveButton = new Button(shell, SWT.PUSH);
 		solveButton.setText("Solve");
 		solveButton.setLayoutData(new GridData(SWT.FILL, SWT.None, false, false, 1, 1));
-		
+
+		maze = new Maze3D(shell, SWT.BORDER);
+		maze.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 4));
+
 		sectionGroup = new Group(shell, SWT.SHADOW_IN);
 		sectionGroup.setText("Display Section");
-		sectionGroup.setLayout(new GridLayout(1,true));
-		sectionGroup.setLayoutData(new GridData(SWT.FILL,SWT.NONE,false,false,1,2));
-		
-	    xSectionButton = new Button(sectionGroup, SWT.RADIO);
-	    xSectionButton.setText("X");
-	    xSectionButton.setLayoutData(new GridData(SWT.FILL, SWT.None, false, false, 1, 1));
-	    ySectionButton = new Button(sectionGroup, SWT.RADIO);
-	    ySectionButton.setText("Y");
-	    ySectionButton.setLayoutData(new GridData(SWT.FILL, SWT.None, false, false, 1, 1));
-	    zSectionButton = new Button(sectionGroup, SWT.RADIO);
-	    zSectionButton.setText("Z");
-	    zSectionButton.setLayoutData(new GridData(SWT.FILL, SWT.None, false, false, 1, 1));
+		sectionGroup.setLayout(new GridLayout(1, true));
+		sectionGroup.setLayoutData(new GridData(SWT.FILL, SWT.NONE, false, false, 1, 2));
+
+		xSectionButton = new Button(sectionGroup, SWT.RADIO);
+		xSectionButton.setText("X - Length");
+		xSectionButton.setLayoutData(new GridData(SWT.FILL, SWT.None, false, false, 1, 1));
+		ySectionButton = new Button(sectionGroup, SWT.RADIO);
+		ySectionButton.setText("Y - Height");
+		ySectionButton.setLayoutData(new GridData(SWT.FILL, SWT.None, false, false, 1, 1));
+		zSectionButton = new Button(sectionGroup, SWT.RADIO);
+		zSectionButton.setText("Z - Width");
+		zSectionButton.setLayoutData(new GridData(SWT.FILL, SWT.None, false, false, 1, 1));
 
 		exitButton = new Button(shell, SWT.PUSH);
 		exitButton.setText("Exit");
 		exitButton.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false, 1, 1));
 		exitButton.setEnabled(true);
-		
-		
-		initMainWindowItemsListeners();
-		initFileMenuItemsListeners();
-		initHelpMenuItemsListeners();
-	}
-	
-	public void addObserver(Observer o) {
-		observable.addObserver(o);
-	}
-
-	private void initMainWindowItemsListeners() {
-		generateButton.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent arg0) {
-				GenerateMazeDialog dgd = new GenerateMazeDialog(shell);
-				int retVal;
-				retVal=dgd.open();
-				if(retVal==SWT.OK) {
-					observable.changeAndNotifyObservers("GENERATE: " +dgd.getMazeName() + " " + dgd.getHeight() + " " + dgd.getWidth() + " " + dgd.getLength());
-				}
-			}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-		});
-		
-		solveButton.addSelectionListener(new SelectionListener() {
-			
-			@Override
-			public void widgetSelected(SelectionEvent arg0) {}
-			
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {}
-		});
-		
-		exitButton.addSelectionListener(exitSelectionListener);
-	}
-
-	private void initHelpMenuItemsListeners() {
-		helpHintItem.addSelectionListener(new SelectionListener() {
-
-			@Override
-			public void widgetSelected(SelectionEvent arg0) {
-				MessageBoxCreator.createErrorMessageBox(shell, "Not yet implemented!");
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-			}
-		});
-		
-		helpAboutItem.addSelectionListener(new SelectionListener() {
-
-			@Override
-			public void widgetSelected(SelectionEvent arg0) {
-				MessageBoxCreator.createNotificationMessageBox(shell, "About", "Created by: Iddo Alexander\nCourse: Algorithmic Java Development\nLecturer: Eli K.");
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-			}
-		});
-	}
-
-	private void initFileMenuItemsListeners() {
-		filePropertyItem.addSelectionListener(new SelectionListener() {
-
-			@Override
-			public void widgetSelected(SelectionEvent arg0) {
-				FileDialog fd = new FileDialog(shell, SWT.OPEN);
-				fd.setText("open");
-				fd.setFilterPath("");
-				String[] filterExt = { "*.xml" };
-				fd.setFilterExtensions(filterExt);
-				propertyFile = fd.open();
-				if(propertyFile!=null) {
-					observable.changeAndNotifyObservers("PROPERTY: " + propertyFile);
-				}
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-			}
-		});
-		
-		fileSaveItem.addSelectionListener(new SelectionListener() {
-
-			@Override
-			public void widgetSelected(SelectionEvent arg0) {
-				FileDialog fd = new FileDialog(shell, SWT.SAVE);
-				fd.setText("save");
-				fd.setFilterPath("");
-				String[] filterExt = { "*.maz" };
-				fd.setFilterExtensions(filterExt);
-				saveMazeFile = fd.open();
-				if(saveMazeFile!=null) {
-					observable.changeAndNotifyObservers("SAVE: " + saveMazeFile);
-				}
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-			}
-		});
-		
-		fileLoadItem.addSelectionListener(new SelectionListener() {
-
-			@Override
-			public void widgetSelected(SelectionEvent arg0) {
-				FileDialog fd = new FileDialog(shell, SWT.OPEN);
-				fd.setText("load");
-				fd.setFilterPath("");
-				String[] filterExt = { "*.maz" };
-				fd.setFilterExtensions(filterExt);
-				loadMazeFile = fd.open();
-				if(loadMazeFile!=null) {
-					observable.changeAndNotifyObservers("LOAD: " + loadMazeFile);
-				}
-			}
-
-			@Override
-			public void widgetDefaultSelected(SelectionEvent arg0) {
-			}
-		});
-		
-		fileExitItem.addSelectionListener(exitSelectionListener);
 	}
 
 	public void setMazeData(int[][] crossSection) {
 		maze.setMazeData(crossSection);
+	}
+
+	public void setShellCloseListener(Listener listener) {
+		shell.addListener(SWT.Close, listener);
+	}
+
+	public void setGenerateSelectionListener(SelectionListener sl) {
+		generateButton.addSelectionListener(sl);
+	}
+
+	public void setSolveSelectionListener(SelectionListener sl) {
+		solveButton.addSelectionListener(sl);
+	}
+
+	public void setExitSelectionListener(SelectionListener sl) {
+		exitButton.addSelectionListener(sl);
+	}
+
+	public void setHelpHintItemSelectionListener(SelectionListener sl) {
+		helpHintItem.addSelectionListener(sl);
+	}
+
+	public void setHelpAboutItemSelectionListener(SelectionListener sl) {
+		helpAboutItem.addSelectionListener(sl);
+	}
+
+	public void setFilePropertyItemSelectionListener(SelectionListener sl) {
+		filePropertyItem.addSelectionListener(sl);
+	}
+
+	public void setFileSaveItemSelectionListener(SelectionListener sl) {
+		fileSaveItem.addSelectionListener(sl);
+	}
+
+	public void setFileLoadItemSelectionListener(SelectionListener sl) {
+		fileLoadItem.addSelectionListener(sl);
+	}
+
+	public void setFileExitItemSelectionListener(SelectionListener sl) {
+		fileExitItem.addSelectionListener(sl);
+	}
+
+	public void setXSectionRadioSelectionListener(SelectionListener sl) {
+		xSectionButton.addSelectionListener(sl);
+	}
+
+	public void setYSectionRadioSelectionListener(SelectionListener sl) {
+		ySectionButton.addSelectionListener(sl);
+	}
+
+	public void setZSectionRadioSelectionListener(SelectionListener sl) {
+		zSectionButton.addSelectionListener(sl);
+	}
+
+	public void setCurrentPositionText(String posString) {
+		display.syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				currPositionText.setText(posString);
+				positionsComposite.layout();
+			}
+		});
+	}
+
+	public void setGoalPositionText(String posString) {
+		display.syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				goalPositionText.setText(posString);
+				positionsComposite.layout();
+			}
+		});
 	}
 }

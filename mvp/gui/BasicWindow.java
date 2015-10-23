@@ -7,7 +7,8 @@ public abstract class BasicWindow implements Runnable {
 
 	Display display;
 	Shell shell;
-
+	boolean widgetsInitialized = false;
+	
 	public BasicWindow(String title, int width, int height) {
 		display = new Display();
 		shell = new Shell(display);
@@ -16,10 +17,22 @@ public abstract class BasicWindow implements Runnable {
 	}
 
 	abstract void initWidgets();
+	
+	/**
+	 * Lets you initialize the widgets before opening the window.
+	 * Can be used to set listeners after initializing.
+	 * Will initialize the widgets only once, if even run multiple times.
+	 */
+	public void actualInitWidgets() {
+		if(!widgetsInitialized) {
+			initWidgets();
+			widgetsInitialized = true;
+		}
+	}
 
 	@Override
 	public void run() {
-		initWidgets();
+		actualInitWidgets();
 		shell.open();
 		// main event loop
 		while (!shell.isDisposed()) { // while window isn't closed

@@ -79,6 +79,9 @@ public interface IModel {
 	 * @param args the args
 	 * @throws ModelException the model exception
 	 */
+	
+	public void loadProperties(String fileName);
+	
 	public void displaySolution(String[] args) throws ModelException;
 	
 	public Maze3d getMaze(String mazeName) throws ModelException;
@@ -90,5 +93,7 @@ public interface IModel {
 	public void setAmountThreads(int numThreads);
 
 	public void getFileSize(String fileName) throws ModelException;
+
+	public void getPositions(String mazeName) throws ModelException;
 
 }

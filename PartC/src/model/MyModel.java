@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
-
 import algorithms.mazeGenerators.Maze3d;
 import algorithms.mazeGenerators.MyMazeGenerator;
 import algorithms.mazeGenerators.Position;
@@ -17,7 +16,6 @@ import io.MyCompressorOutputStream;
 import io.MyDecompressorInputStream;
 import search.Searcher;
 import search.Solution;
-import view.IDisplayable;
 import view.IMazeDisplayable;
 import view.MyDisplayable;
 
@@ -290,6 +288,17 @@ public class MyModel extends CommonModel {
 
 	@Override
 	public void getFileSize(String fileName) throws ModelException {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void loadProperties(String fileName) {
+		// TODO Auto-generated method stub
+	}
+
+	@Override
+	public void getPositions(String mazeName) {
 		// TODO Auto-generated method stub
 		
 	}

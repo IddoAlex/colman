@@ -16,14 +16,15 @@ import controller.commands.DisplaySolutionCommand;
 import controller.commands.ExitCommand;
 import controller.commands.FileSizeCommand;
 import controller.commands.GenerateMaze3dCommand;
+import controller.commands.GetPositionsCommand;
 import controller.commands.ICommand;
 import controller.commands.LoadMazeCommand;
+import controller.commands.LoadPropertiesCommand;
 import controller.commands.MazeSizeCommand;
 import controller.commands.SaveMazeCommand;
 import controller.commands.SolveCommand;
 import model.MVPModel;
 import search.Solution;
-import view.IDisplayable;
 import view.IMazeDisplayable;
 import view.MVPView;
 import view.MyDisplayable;
@@ -32,14 +33,14 @@ public class MVPPresenter implements Observer {
 	MVPModel model;
 	MVPView view;
 	HashMap<String, ICommand> map;
-	
+
 	public MVPPresenter(MVPModel aModel, MVPView aView) {
 		this.model = aModel;
 		this.view = aView;
-		
+
 		model.addObserver(this);
 		view.addObserver(this);
-		
+
 		map = new HashMap<>();
 		initStringCommandMap();
 	}
@@ -47,7 +48,7 @@ public class MVPPresenter implements Observer {
 	@Override
 	public void update(Observable observable, Object arg) {
 		if (observable == view) {
-			analyzeViewUpdate((String)arg);
+			analyzeViewUpdate((String) arg);
 		} else if (observable == model) {
 			analyzeModelUpdate(arg);
 		}
@@ -65,12 +66,14 @@ public class MVPPresenter implements Observer {
 		map.put("solve", new SolveCommand(view, model));
 		map.put("display solution", new DisplaySolutionCommand(view, model));
 		map.put("exit", new ExitCommand(view, model));
+		map.put("load properties", new LoadPropertiesCommand(view, model));
+		map.put("get positions", new GetPositionsCommand(view, model));
 	}
 
 	private void analyzeViewUpdate(String line) {
 		ICommand command;
 		String joined;
-		String[] splitted = line.split("\\s+");
+		String[] splitted = line.toLowerCase().split("\\s+");
 		int lastWordIndex = splitted.length + 1;
 		List<String> joinStrings;
 		List<String> joingArgStrings;
@@ -102,26 +105,23 @@ public class MVPPresenter implements Observer {
 			view.display(new MyDisplayable("Command '" + line + "' is invalid!"));
 		}
 	}
-	
+
 	private void analyzeModelUpdate(Object arg) {
 		MyDisplayable displayable = new MyDisplayable();
-		
-		if(arg instanceof Maze3d) {
+
+		if (arg instanceof Maze3d) {
 			Maze3d maze = (Maze3d) arg;
 			displayable.setMessage(maze.toString());
-		} 
-		else if(arg instanceof Solution<?>) {
+		} else if (arg instanceof Solution<?>) {
 			Solution<?> solution = (Solution<?>) arg;
 			displayable.setMessage(solution.toString());
-		} 
-		else if(arg instanceof String) {
+		} else if (arg instanceof String) {
 			String line = (String) arg;
 			displayable.setMessage(line);
-		}
-		else if(arg instanceof int[][]) {
+		} else if (arg instanceof int[][]) {
 			int[][] crossSection = (int[][]) arg;
 			displayable = null; // so wouldn't print twice
-			
+
 			view.display(new IMazeDisplayable() {
 				String message;
 
@@ -129,14 +129,14 @@ public class MVPPresenter implements Observer {
 				public void display(OutputStream out) {
 					PrintWriter writer = new PrintWriter(out);
 					for (int i = 0; i < crossSection.length; i++) {
-						message+="[ ";
+						message += "[ ";
 						for (int j = 0; j < crossSection[0].length; j++) {
-							message+=crossSection[i][j] + " ";
+							message += crossSection[i][j] + " ";
 						}
 
-						message+="]\n";
+						message += "]\n";
 					}
-					
+
 					writer.println(getMessage());
 					writer.flush();
 				}
@@ -156,8 +156,8 @@ public class MVPPresenter implements Observer {
 					return crossSection;
 				}
 			});
-		} 
-		
+		}
+
 		view.display(displayable);
 	}
 }

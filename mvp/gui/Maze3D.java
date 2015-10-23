@@ -7,10 +7,10 @@ import org.eclipse.swt.widgets.Composite;
 
 public class Maze3D extends MazeDisplayer {
 
-	public int characterX=0;
-	public int characterY=2;
-	public int exitX=0;
-	public int exitY=2;
+	public int characterX;
+	public int characterY;
+	public int exitX;
+	public int exitY;
 	
 	private void paintCube(double[] p,double h,PaintEvent e){
         int[] f=new int[p.length];
@@ -30,6 +30,7 @@ public class Maze3D extends MazeDisplayer {
         e.gc.fillPolygon(r);
 		
 	}
+	
 	@SuppressWarnings("unused")
 	public Maze3D(Composite parent, int style) {
 		super(parent, style);
@@ -41,6 +42,8 @@ public class Maze3D extends MazeDisplayer {
 			
 			@Override
 			public void paintControl(PaintEvent e) {
+				if(mazeData!=null) {
+					
 				   e.gc.setForeground(new Color(null,0,0,0));
 				   e.gc.setBackground(new Color(null,0,0,0));
 
@@ -72,7 +75,7 @@ public class Maze3D extends MazeDisplayer {
 				          }
 				      }
 				   }
-				
+				}
 			}
 		});
 	}

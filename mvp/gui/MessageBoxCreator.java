@@ -5,6 +5,7 @@ import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 
 public class MessageBoxCreator {
+	static int retVal;
 	
 	public static int createErrorMessageBox(Shell parent, String errorMessage) {
 		return createMessageBox(parent, SWT.ERROR | SWT.OK, "Error occured!", errorMessage);
@@ -19,9 +20,17 @@ public class MessageBoxCreator {
 	}
 	
 	public static int createMessageBox(Shell parent, int style, String title, String message) {
-		MessageBox mb = new MessageBox(parent, style);
-		mb.setText(title);
-		mb.setMessage(message);
-		return mb.open();
+		parent.getDisplay().syncExec(new Runnable() {
+			
+			@Override
+			public void run() {
+				MessageBox mb = new MessageBox(parent, style);
+				mb.setText(title);
+				mb.setMessage(message);
+				retVal = mb.open();
+			}
+		});
+		
+		return retVal;
 	}
 }

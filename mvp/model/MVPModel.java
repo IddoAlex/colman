@@ -37,7 +37,7 @@ public abstract class MVPModel extends Observable implements IModel {
 
 	HashMap<String, Solution<Position>> solutionMap;
 
-	ExecutorService threadPool;
+	ExecutorService threadPool = Executors.newFixedThreadPool(5);
 
 	File mapsFile;
 
@@ -119,10 +119,10 @@ public abstract class MVPModel extends Observable implements IModel {
 	@Override
 	public void saveMaze(String mazeName, String fileName) {
 		threadPool.execute(new Runnable() {
-			
+
 			@Override
 			public void run() {
-				
+
 				try {
 					Maze3d maze = getMaze(mazeName);
 					FileOutputStream fos = new FileOutputStream(fileName);
@@ -136,7 +136,7 @@ public abstract class MVPModel extends Observable implements IModel {
 					notifyObservers("EXCEPTION: IO Error with file path.");
 				} catch (ModelException e) {
 					setChanged();
-					notifyObservers("EXCEPTION: "+e.getMessage());
+					notifyObservers("EXCEPTION: " + e.getMessage());
 				}
 			}
 		});
@@ -333,8 +333,52 @@ public abstract class MVPModel extends Observable implements IModel {
 					notifyObservers("File size: " + fileSize);
 				} catch (NullPointerException e) {
 					setChanged();
-					notifyObservers("EXCEPTION: "+e.getMessage());
+					notifyObservers("EXCEPTION: " + e.getMessage());
 				}
+			}
+		});
+	}
+
+	@Override
+	public void loadProperties(String fileName) {
+		// TODO
+		threadPool.execute(new Runnable() {
+
+			@Override
+			public void run() {
+				try {
+					File file = new File(fileName);
+					file.exists(); // delete
+					// setChanged();
+					// notifyObservers("File size: " + );
+				} catch (NullPointerException e) {
+					setChanged();
+					notifyObservers("EXCEPTION: " + e.getMessage());
+				}
+			}
+		});
+	}
+
+	@Override
+	public void getPositions(String mazeName) throws ModelException {
+		if (mazeName == null || mazeName.isEmpty()) {
+			throw new ModelException("EXCEPTION: No name given for maze");
+		}
+
+		threadPool.execute(new Runnable() {
+			Maze3d maze;
+			String positions;
+			Position startPos, goalPos;
+
+			@Override
+			public void run() {
+				maze = map.get(mazeName);
+				startPos = maze.getStartPosition();
+				goalPos = maze.getGoalPosition();
+				positions = startPos.getHeight() + " " + startPos.getWidth() + " " + startPos.getLength() + " "
+						+ goalPos.getHeight() + " " + goalPos.getWidth() + " " + goalPos.getLength();
+				setChanged();
+				notifyObservers("POSITIONS: " + positions);
 			}
 		});
 	}
