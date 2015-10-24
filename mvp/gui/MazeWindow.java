@@ -1,6 +1,7 @@
 package gui;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -116,7 +117,7 @@ public class MazeWindow extends BasicWindow {
 		solveButton.setText("Solve");
 		solveButton.setLayoutData(new GridData(SWT.FILL, SWT.None, false, false, 1, 1));
 
-		maze = new Maze3D(shell, SWT.BORDER);
+		maze = new Maze3DDisplayer(shell, SWT.BORDER);
 		maze.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 1, 4));
 
 		sectionGroup = new Group(shell, SWT.SHADOW_IN);
@@ -144,6 +145,10 @@ public class MazeWindow extends BasicWindow {
 		maze.setMazeData(crossSection);
 	}
 
+	public void setCharacterPosition(int row, int col) {
+		maze.setCharacterPosition(row, col);
+	}
+	
 	public void setShellCloseListener(Listener listener) {
 		shell.addListener(SWT.Close, listener);
 	}
@@ -194,6 +199,10 @@ public class MazeWindow extends BasicWindow {
 
 	public void setZSectionRadioSelectionListener(SelectionListener sl) {
 		zSectionButton.addSelectionListener(sl);
+	}
+
+	public void setMazeDisplayerKeyListener(KeyListener kl) {
+		maze.addKeyListener(kl);
 	}
 
 	public void setCurrentPositionText(String posString) {

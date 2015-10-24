@@ -9,6 +9,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import algorithms.mazeGenerators.Maze3d;
+import algorithms.mazeGenerators.Position;
 import controller.commands.DirCommand;
 import controller.commands.DisplayCommand;
 import controller.commands.DisplayCrossSectionCommand;
@@ -21,11 +22,13 @@ import controller.commands.ICommand;
 import controller.commands.LoadMazeCommand;
 import controller.commands.LoadPropertiesCommand;
 import controller.commands.MazeSizeCommand;
+import controller.commands.MoveDirectionCommand;
 import controller.commands.SaveMazeCommand;
 import controller.commands.SolveCommand;
 import model.MVPModel;
 import search.Solution;
 import view.IMazeDisplayable;
+import view.ISolutionDisplayable;
 import view.MVPView;
 import view.MyDisplayable;
 
@@ -68,6 +71,7 @@ public class MVPPresenter implements Observer {
 		map.put("exit", new ExitCommand(view, model));
 		map.put("load properties", new LoadPropertiesCommand(view, model));
 		map.put("get positions", new GetPositionsCommand(view, model));
+		map.put("move direction", new MoveDirectionCommand(view, model));
 	}
 
 	private void analyzeViewUpdate(String line) {
@@ -112,12 +116,40 @@ public class MVPPresenter implements Observer {
 		if (arg instanceof Maze3d) {
 			Maze3d maze = (Maze3d) arg;
 			displayable.setMessage(maze.toString());
-		} else if (arg instanceof Solution<?>) {
-			Solution<?> solution = (Solution<?>) arg;
-			displayable.setMessage(solution.toString());
 		} else if (arg instanceof String) {
 			String line = (String) arg;
 			displayable.setMessage(line);
+		} else if (arg instanceof Solution<?>) {
+			Solution<?> theSolution = (Solution<?>) arg;
+			displayable = null;
+			
+			view.display(new ISolutionDisplayable<Position>() {
+
+				String message;
+				@SuppressWarnings("unchecked")
+				Solution<Position> solution = (Solution<Position>) theSolution;
+				
+				@Override
+				public void display(OutputStream out) {
+					PrintWriter pw = new PrintWriter(out);
+					pw.println(solution.toString());
+				}
+
+				@Override
+				public void setMessage(String aMessage) {
+					message = aMessage;
+				}
+
+				@Override
+				public String getMessage() {
+					return message;
+				}
+
+				@Override
+				public Solution<Position> getSolution() {
+					return solution;
+				}
+			});
 		} else if (arg instanceof int[][]) {
 			int[][] crossSection = (int[][]) arg;
 			displayable = null; // so wouldn't print twice

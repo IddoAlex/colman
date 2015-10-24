@@ -22,6 +22,7 @@ import algorithms.mazeGenerators.Position;
 import demo.Maze3dSearchable;
 import exceptions.CommandException;
 import exceptions.ModelException;
+import gui.MessageBoxCreator;
 import io.MyCompressorOutputStream;
 import io.MyDecompressorInputStream;
 import search.Searcher;
@@ -43,7 +44,7 @@ public abstract class MVPModel extends Observable implements IModel {
 
 	@Override
 	public void generateMaze3d(String mazeName, String arguments) {
-		if (mazeName == null || mazeName.isEmpty()) {
+		if (!validateName(mazeName)) {
 			setChanged();
 			notifyObservers("EXCEPTION: No name given for maze");
 		} else {
@@ -69,7 +70,7 @@ public abstract class MVPModel extends Observable implements IModel {
 			try {
 				map.put(mazeName, futureMaze.get());
 				setChanged();
-				notifyObservers("GENERATE: Maze " + mazeName + " was Generated.");
+				notifyObservers("GENERATE: Maze '" + mazeName + "' was Generated.");
 			} catch (InterruptedException | ExecutionException e) {
 				setChanged();
 				notifyObservers("EXCEPTION: Generation maze exception occured");
@@ -232,7 +233,7 @@ public abstract class MVPModel extends Observable implements IModel {
 	@Override
 	public Maze3d getMaze(String mazeName) throws ModelException {
 		Maze3d maze;
-		if (mazeName == null || mazeName.isEmpty()) {
+		if (!validateName(mazeName)) {
 			throw new ModelException("EXCEPTION: No name given for maze");
 		}
 
@@ -247,7 +248,7 @@ public abstract class MVPModel extends Observable implements IModel {
 	@Override
 	public Solution<Position> getSolution(String mazeName) throws ModelException {
 		Solution<Position> solution;
-		if (mazeName == null || mazeName.isEmpty()) {
+		if (!validateName(mazeName)) {
 			throw new ModelException("EXCEPTION: No name given for maze");
 		}
 
@@ -272,7 +273,7 @@ public abstract class MVPModel extends Observable implements IModel {
 			public void run() {
 				try {
 					fos = new FileOutputStream(mapsFile, true);
-					gos = new GZIPOutputStream(oos);
+					gos = new GZIPOutputStream(fos);
 					oos = new ObjectOutputStream(gos);
 
 					oos.writeObject(map);
@@ -361,7 +362,7 @@ public abstract class MVPModel extends Observable implements IModel {
 
 	@Override
 	public void getPositions(String mazeName) throws ModelException {
-		if (mazeName == null || mazeName.isEmpty()) {
+		if (!validateName(mazeName)) {
 			throw new ModelException("EXCEPTION: No name given for maze");
 		}
 
@@ -383,9 +384,70 @@ public abstract class MVPModel extends Observable implements IModel {
 		});
 	}
 
+	@Override
+	public void moveDirection(String mazeName, String position, String direction) throws ModelException {
+		if (!validateName(mazeName)) {
+			throw new ModelException("EXCEPTION: Invalid maze name");
+		}
+
+		if (!map.containsKey(mazeName)) {
+			throw new ModelException("EXCEPTION: Maze '" + mazeName + "' doesn't exist.");
+		}
+
+		threadPool.execute(new Runnable() {
+			Maze3d maze;
+			String[] positionInts = position.split(" ");
+			Position curr = new Position(Integer.parseInt(positionInts[0]), Integer.parseInt(positionInts[1]),
+					Integer.parseInt(positionInts[2]));
+
+			@Override
+			public void run() {
+				boolean moved = true;
+				maze = map.get(mazeName);
+				switch (direction.toLowerCase()) {
+				case "up":
+					curr.moveUp();
+					break;
+				case "down":
+					curr.moveDown();
+					break;
+				case "left":
+					curr.moveLeft();
+					break;
+				case "right":
+					curr.moveRight();
+					break;
+				case "forward":
+					curr.moveForwards();
+					break;
+				case "backward":
+					curr.moveBackwards();
+					break;
+				default:
+					moved = false;
+					break;
+				}
+
+				String notifiedString = null;
+				if (!moved) {
+					notifiedString = "EXCEPTION: illegal direction received";
+				} else {
+					if (maze.isMoveablePosition(curr)) {
+						notifiedString = "MOVE: " + curr.getHeight() + " " + curr.getWidth() + " " + curr.getLength();
+					}
+				}
+
+				if (notifiedString != null) {
+					setChanged();
+					notifyObservers(notifiedString);
+				}
+			}
+		});
+	}
+
 	private Searcher<Position> getAlgorithm(String algorithmName) throws ModelException {
 		Searcher<Position> algorithm;
-		if (algorithmName == null || algorithmName.isEmpty()) {
+		if (!validateName(algorithmName)) {
 			throw new ModelException("EXCEPTION: No name given for algorithm");
 		}
 
@@ -395,5 +457,9 @@ public abstract class MVPModel extends Observable implements IModel {
 		}
 
 		return algorithm;
+	}
+
+	private boolean validateName(String name) {
+		return name != null && !name.isEmpty();
 	}
 }

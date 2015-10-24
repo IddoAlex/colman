@@ -96,4 +96,6 @@ public interface IModel {
 
 	public void getPositions(String mazeName) throws ModelException;
 
+	public void moveDirection(String mazeName, String position, String direction) throws ModelException;
+
 }

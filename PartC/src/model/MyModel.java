@@ -288,18 +288,21 @@ public class MyModel extends CommonModel {
 
 	@Override
 	public void getFileSize(String fileName) throws ModelException {
-		// TODO Auto-generated method stub
-		
+		// Shouldn't do anything in MVC
 	}
 
 	@Override
 	public void loadProperties(String fileName) {
-		// TODO Auto-generated method stub
+		// Shouldn't do anything in MVC
 	}
 
 	@Override
 	public void getPositions(String mazeName) {
-		// TODO Auto-generated method stub
-		
+		// Shouldn't do anything in MVC
+	}
+
+	@Override
+	public void moveDirection(String mazeName, String position, String direction) {
+		// Shouldn't do anything in MVC
 	}
 }

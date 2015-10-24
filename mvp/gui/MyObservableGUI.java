@@ -2,16 +2,21 @@ package gui;
 
 import java.io.File;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyEvent;
+import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Listener;
 
 import algorithms.mazeGenerators.Position;
+import search.Solution;
 import view.IDisplayable;
 import view.IMazeDisplayable;
+import view.ISolutionDisplayable;
 import view.MVPView;
 
 public class MyObservableGUI extends MVPView {
@@ -23,11 +28,15 @@ public class MyObservableGUI extends MVPView {
 	String loadMazeFile;
 
 	String currMazeName;
+	String currAlgorithm = "air";
 
 	Position currPosition;
 	Position endPosition;
 
 	Button selectedCrossSection;
+
+	boolean isMazeCompleted = false;
+	Image victoryImage;
 
 	public MyObservableGUI() {
 		win = new MazeWindow("Maze Puzzle", 500, 300);
@@ -40,39 +49,77 @@ public class MyObservableGUI extends MVPView {
 		win.run();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void display(IDisplayable displayable) {
 		if (displayable != null) {
 			if (displayable instanceof IMazeDisplayable) {
 				IMazeDisplayable mazeDisplayable = (IMazeDisplayable) displayable;
 				win.setMazeData(mazeDisplayable.getMazeCrossSection());
+			} else if(displayable instanceof ISolutionDisplayable<?>) {
+				ISolutionDisplayable<Position> positionSolution = (ISolutionDisplayable<Position>) displayable;
+				Solution<Position> solution = positionSolution.getSolution();
+				solveMaze(solution);
 			} else {
 				String message = displayable.getMessage().toLowerCase();
-				String reason = message.split(":")[0];
+				String[] splitMessage = message.split(":");
+				String reason = splitMessage[0];
+				String notification = "";
+				if (splitMessage.length > 1) {
+					notification = splitMessage[1].trim();
+				}
+
 				switch (reason) {
 				case "exception":
-					MessageBoxCreator.createErrorMessageBox(win.shell, message);
+					MessageBoxCreator.createErrorMessageBox(win.shell, notification);
 					break;
 				case "generate":
 				case "load":
-					currMazeName = message.split(":")[1].trim().split(" ")[1];
+					currMazeName = notification.split(" ")[1].split("'")[1];
 					setChanged();
 					notifyObservers("get positions " + currMazeName);
+					isMazeCompleted = false;
 					break;
 				case "positions":
-					String[] posValues = message.split(":")[1].trim().split(" ");
-					currPosition = new Position(Integer.parseInt(posValues[0]), Integer.parseInt(posValues[1]),
-							Integer.parseInt(posValues[2]));
-					endPosition = new Position(Integer.parseInt(posValues[3]), Integer.parseInt(posValues[4]),
-							Integer.parseInt(posValues[5]));
-					win.setCurrentPositionText("( " + posValues[0] + ", " + posValues[1] + ", " + posValues[2] + ")");
-					win.setGoalPositionText("( " + posValues[3] + ", " + posValues[4] + ", " + posValues[5] + ")");
+					String[] posValues = notification.split(" ");
+					int goalHeight = Integer.parseInt(posValues[3]);
+					int goalWidth = Integer.parseInt(posValues[4]);
+					int goalLength = Integer.parseInt(posValues[5]);
+					endPosition = new Position(goalHeight, goalWidth, goalLength);
+					win.setGoalPositionText("( " + goalLength + ", " + goalHeight + ", " + goalWidth + ")");
+				case "move":
+					posValues = notification.split(" ");
+					int currHeight = Integer.parseInt(posValues[0]);
+					int currWidth = Integer.parseInt(posValues[1]);
+					int currLength = Integer.parseInt(posValues[2]);
+					currPosition = new Position(currHeight, currWidth, currLength);
+					win.setCurrentPositionText("( " + currLength + ", " + currHeight + ", " + currWidth + ")");
 					clickSelectedCrossSection();
+					checkVictory();
+					break;
+				case "solve":
+					currMazeName = notification.split(" ")[1].split("'")[1];
+					setChanged();
+					notifyObservers("display solution " + currMazeName);
+					break;
 				default:
 					MessageBoxCreator.createNotificationMessageBox(win.shell, message);
 					break;
 				}
 			}
+		}
+	}
+
+	private void solveMaze(Solution<Position> solution) {
+		// TODO
+		// Timer task
+	}
+
+	private void checkVictory() {
+		if (currPosition.equals(endPosition)) {
+			// TODO
+			MessageBoxCreator.createMessageBox(win.shell, SWT.HOME, "Victory!", "Good job!\nMaze completed");
+			isMazeCompleted = true;
 		}
 	}
 
@@ -115,7 +162,10 @@ public class MyObservableGUI extends MVPView {
 
 			@Override
 			public void widgetSelected(SelectionEvent arg0) {
-				// TODO
+				if (currMazeName != null && currAlgorithm != null) {
+					setChanged();
+					notifyObservers("solve " + currMazeName + " " + currAlgorithm);
+				}
 			}
 
 			@Override
@@ -181,11 +231,11 @@ public class MyObservableGUI extends MVPView {
 				saveMazeFile = fd.open();
 				if (saveMazeFile != null) {
 					File file = new File(saveMazeFile);
-					String fileName = file.getName();
-					String mazeName = fileName.split(".")[0];
+					String path = file.getParentFile().getAbsolutePath();
+					String fileName = path + File.separator + currMazeName + ".maz";
 
 					setChanged();
-					notifyObservers("save maze " + mazeName + " " + saveMazeFile);
+					notifyObservers("save maze " + currMazeName + " " + fileName);
 				}
 			}
 
@@ -207,8 +257,11 @@ public class MyObservableGUI extends MVPView {
 				if (loadMazeFile != null) {
 					File file = new File(loadMazeFile);
 					String fileName = file.getName();
-					String mazeName = fileName.split(".")[0];
-
+					String mazeName = fileName;
+					int pos = fileName.lastIndexOf(".");
+					if (pos > 0) {
+						mazeName = fileName.substring(0, pos);
+					}
 					setChanged();
 					notifyObservers("load maze " + loadMazeFile + " " + mazeName);
 				}
@@ -225,6 +278,7 @@ public class MyObservableGUI extends MVPView {
 			public void widgetSelected(SelectionEvent arg0) {
 				selectedCrossSection = win.xSectionButton;
 				if (currMazeName != null) {
+					win.setCharacterPosition(currPosition.getHeight(), currPosition.getWidth());
 					setChanged();
 					notifyObservers("display cross section by X " + currPosition.getLength() + " for " + currMazeName);
 				}
@@ -241,6 +295,7 @@ public class MyObservableGUI extends MVPView {
 			public void widgetSelected(SelectionEvent arg0) {
 				selectedCrossSection = win.ySectionButton;
 				if (currMazeName != null) {
+					win.setCharacterPosition(currPosition.getLength(), currPosition.getWidth());
 					setChanged();
 					notifyObservers("display cross section by Y " + currPosition.getHeight() + " for " + currMazeName);
 				}
@@ -257,6 +312,7 @@ public class MyObservableGUI extends MVPView {
 			public void widgetSelected(SelectionEvent arg0) {
 				selectedCrossSection = win.zSectionButton;
 				if (currMazeName != null) {
+					win.setCharacterPosition(currPosition.getLength(), currPosition.getHeight());
 					setChanged();
 					notifyObservers("display cross section by Z " + currPosition.getWidth() + " for " + currMazeName);
 				}
@@ -264,6 +320,46 @@ public class MyObservableGUI extends MVPView {
 
 			@Override
 			public void widgetDefaultSelected(SelectionEvent arg0) {
+			}
+		});
+
+		win.setMazeDisplayerKeyListener(new KeyListener() {
+
+			@Override
+			public void keyReleased(KeyEvent arg0) {
+			}
+
+			@Override
+			public void keyPressed(KeyEvent e) {
+				String direction = "";
+				switch (e.keyCode) {
+				case SWT.ARROW_UP:
+					direction = "backward";
+					break;
+				case SWT.ARROW_DOWN:
+					direction = "forward";
+					break;
+				case SWT.ARROW_LEFT:
+					direction = "left";
+					break;
+				case SWT.ARROW_RIGHT:
+					direction = "right";
+					break;
+				case SWT.PAGE_UP:
+					direction = "up";
+					break;
+				case SWT.PAGE_DOWN:
+					direction = "down";
+					break;
+				default:
+					break;
+				}
+
+				if (direction != "" && currMazeName != null && currPosition != null && !isMazeCompleted) {
+					setChanged();
+					notifyObservers("move direction " + direction + " " + currMazeName + " " + currPosition.getHeight()
+							+ " " + currPosition.getWidth() + " " + currPosition.getLength());
+				}
 			}
 		});
 
@@ -283,9 +379,9 @@ public class MyObservableGUI extends MVPView {
 
 		win.setFileExitItemSelectionListener(exitSelectionListener);
 
-		// Default select XSection:
-		// win.xSectionButton.setSelection(true);
-		selectedCrossSection = win.xSectionButton;
+		// Default select YSection:
+		selectedCrossSection = win.ySectionButton;
+		clickSelectedCrossSection();
 	}
 
 	private void clickSelectedCrossSection() {
@@ -297,5 +393,9 @@ public class MyObservableGUI extends MVPView {
 				selectedCrossSection.notifyListeners(SWT.Selection, new Event());
 			}
 		});
+	}
+	
+	public void setAlgorithm(String algorithm) {
+		currAlgorithm = algorithm;
 	}
 }

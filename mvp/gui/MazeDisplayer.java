@@ -16,16 +16,8 @@ public abstract class MazeDisplayer extends Canvas {
 
 	public void setMazeData(int[][] mazeData) {
 		this.mazeData = mazeData;
+		redraw();
 	}
 
 	public abstract void setCharacterPosition(int row, int col);
-
-	public abstract void moveUp();
-
-	public abstract void moveDown();
-
-	public abstract void moveLeft();
-
-	public abstract void moveRight();
-
 }

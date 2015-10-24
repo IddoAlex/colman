@@ -137,8 +137,8 @@ public class Maze3d {
 		}
 
 		int[][] maze2d = new int[getHeight()][getWidth()];
-		for (int i = 0; i < getHeight(); i++) {
-			for (int j = 0; j < getWidth(); j++) {
+		for (int i = 0; i < maze2d.length; i++) {
+			for (int j = 0; j < maze2d[0].length; j++) {
 				maze2d[i][j] = m_maze[i][j][num];
 			}
 		}
@@ -150,10 +150,10 @@ public class Maze3d {
 			throw new IndexOutOfBoundsException();
 		}
 
-		int[][] maze2d = new int[getWidth()][getLength()];
-		for (int i = 0; i < getWidth(); i++) {
-			for (int j = 0; j < getLength(); j++) {
-				maze2d[i][j] = m_maze[num][i][j];
+		int[][] maze2d = new int[getLength()][getWidth()];
+		for (int i = 0; i < maze2d.length; i++) {
+			for (int j = 0; j < maze2d[0].length; j++) {
+				maze2d[i][j] = m_maze[num][j][i];
 			}
 		}
 		return maze2d;
@@ -164,10 +164,10 @@ public class Maze3d {
 			throw new IndexOutOfBoundsException();
 		}
 
-		int[][] maze2d = new int[getHeight()][getLength()];
-		for (int i = 0; i < getHeight(); i++) {
-			for (int j = 0; j < getLength(); j++) {
-				maze2d[i][j] = m_maze[i][num][j];
+		int[][] maze2d = new int[getLength()][getHeight()];
+		for (int i = 0; i < maze2d.length; i++) {
+			for (int j = 0; j < maze2d[0].length; j++) {
+				maze2d[i][j] = m_maze[j][num][i];
 			}
 		}
 		return maze2d;
@@ -349,5 +349,9 @@ public class Maze3d {
 		if (m_width != other.m_width)
 			return false;
 		return true;
+	}
+	
+	public boolean isMoveablePosition(Position p) {
+		return isLegalPosition(p) && isPass(p);
 	}
 }

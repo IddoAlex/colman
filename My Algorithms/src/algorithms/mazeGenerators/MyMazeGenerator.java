@@ -52,6 +52,7 @@ public class MyMazeGenerator extends CommonMaze3dGenerator {
 			}
 		}
 		
+		maze.setPass(maze.getStartPosition());
 		maze.setPass(maze.getGoalPosition());
 		return maze;
 	}
