@@ -1,17 +1,12 @@
 package testsIGNORE;
 
-import gui.MyObservableGUI;
-import model.MyObservableModel;
-import presenter.MVPPresenter;
+import boot.GameLauncher;
 
 public class Tests {
 
 	public static void main(String[] args) {
-		MyObservableModel model = new MyObservableModel();
-		MyObservableGUI gui = new MyObservableGUI();
+		GameLauncher gl = new GameLauncher();
 		
-		MVPPresenter presenter = new MVPPresenter(model, gui);
-		
-		gui.start();
+		gl.start();
 	}
 }

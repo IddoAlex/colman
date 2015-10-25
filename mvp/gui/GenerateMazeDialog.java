@@ -158,7 +158,7 @@ public class GenerateMazeDialog extends BasicDialog {
 		}
 		
 		mazeName = nameText.getText();
-		return (mazeName!=null && mazeName != "");
+		return (mazeName!=null && mazeName != "" && mazeName.split(" ").length == 1);
 	}
 
 	

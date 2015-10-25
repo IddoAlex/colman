@@ -2,6 +2,7 @@ package model;
 
 import java.io.File;
 import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.ObjectOutputStream;
@@ -20,11 +21,12 @@ import algorithms.mazeGenerators.Maze3d;
 import algorithms.mazeGenerators.MyMazeGenerator;
 import algorithms.mazeGenerators.Position;
 import demo.Maze3dSearchable;
+import exceptions.ColmanException;
 import exceptions.CommandException;
 import exceptions.ModelException;
-import gui.MessageBoxCreator;
 import io.MyCompressorOutputStream;
 import io.MyDecompressorInputStream;
+import presenter.Properties;
 import search.Searcher;
 import search.Solution;
 
@@ -32,15 +34,23 @@ public abstract class MVPModel extends Observable implements IModel {
 
 	private static final int DEFAULT_SIZE = 5;
 
+	private static final int DEFAULT_NUM_THREADS = 5;
+
 	HashMap<String, Maze3d> map;
 
 	HashMap<String, Searcher<Position>> algorithmMap;
 
 	HashMap<String, Solution<Position>> solutionMap;
 
-	ExecutorService threadPool = Executors.newFixedThreadPool(5);
+	ExecutorService threadPool;
 
 	File mapsFile;
+	
+	int numThreadsPool;
+	
+	public MVPModel() {
+		mapsFile = new File("maps.bin");
+	}
 
 	@Override
 	public void generateMaze3d(String mazeName, String arguments) {
@@ -50,7 +60,7 @@ public abstract class MVPModel extends Observable implements IModel {
 		} else {
 			String[] parameters = arguments.split(" ");
 
-			Future<Maze3d> futureMaze = threadPool.submit(new Callable<Maze3d>() {
+			Future<Maze3d> futureMaze = getThreadPool().submit(new Callable<Maze3d>() {
 				Maze3d maze;
 
 				@Override
@@ -119,7 +129,7 @@ public abstract class MVPModel extends Observable implements IModel {
 
 	@Override
 	public void saveMaze(String mazeName, String fileName) {
-		threadPool.execute(new Runnable() {
+		getThreadPool().execute(new Runnable() {
 
 			@Override
 			public void run() {
@@ -145,7 +155,7 @@ public abstract class MVPModel extends Observable implements IModel {
 
 	@Override
 	public void loadMaze(String fileName, String mazeName) {
-		threadPool.execute(new Runnable() {
+		getThreadPool().execute(new Runnable() {
 
 			@Override
 			public void run() {
@@ -200,7 +210,7 @@ public abstract class MVPModel extends Observable implements IModel {
 
 		Maze3d maze = getMaze(name);
 		Searcher<Position> searcher = getAlgorithm(algorithm);
-		Future<Solution<Position>> futureSolution = threadPool.submit(new Callable<Solution<Position>>() {
+		Future<Solution<Position>> futureSolution = getThreadPool().submit(new Callable<Solution<Position>>() {
 
 			@Override
 			public Solution<Position> call() throws Exception {
@@ -263,7 +273,7 @@ public abstract class MVPModel extends Observable implements IModel {
 	@Override
 	public void exit() {
 
-		threadPool.execute(new Runnable() {
+		getThreadPool().execute(new Runnable() {
 			// Save hashMaps before exiting
 			FileOutputStream fos = null;
 			ObjectOutputStream oos = null;
@@ -315,15 +325,25 @@ public abstract class MVPModel extends Observable implements IModel {
 
 	@Override
 	public void setAmountThreads(int numThreads) {
+		numThreadsPool = numThreads;
+	}
+	
+	private ExecutorService getThreadPool() {
 		if (threadPool == null) {
-			threadPool = Executors.newFixedThreadPool(numThreads);
+			if(numThreadsPool < 1) {
+				numThreadsPool = DEFAULT_NUM_THREADS;
+			}
+			
+			threadPool = Executors.newFixedThreadPool(numThreadsPool);
 		}
+		
+		return threadPool;
 	}
 
 	@Override
 	public void getFileSize(String fileName) {
 
-		threadPool.execute(new Runnable() {
+		getThreadPool().execute(new Runnable() {
 
 			@Override
 			public void run() {
@@ -342,17 +362,19 @@ public abstract class MVPModel extends Observable implements IModel {
 
 	@Override
 	public void loadProperties(String fileName) {
-		// TODO
-		threadPool.execute(new Runnable() {
+		getThreadPool().execute(new Runnable() {
 
 			@Override
 			public void run() {
 				try {
-					File file = new File(fileName);
-					file.exists(); // delete
-					// setChanged();
-					// notifyObservers("File size: " + );
-				} catch (NullPointerException e) {
+					Properties p = new Properties();
+					p.load(new FileInputStream(fileName));
+					
+					// The only dynamic parameter..
+					String newAlgorithm = p.getProperty("Solving Algorithm");
+					setChanged();
+					notifyObservers("SET_ALGORITHM: " + newAlgorithm);
+				} catch (NullPointerException | FileNotFoundException | ColmanException e) {
 					setChanged();
 					notifyObservers("EXCEPTION: " + e.getMessage());
 				}
@@ -366,7 +388,7 @@ public abstract class MVPModel extends Observable implements IModel {
 			throw new ModelException("EXCEPTION: No name given for maze");
 		}
 
-		threadPool.execute(new Runnable() {
+		getThreadPool().execute(new Runnable() {
 			Maze3d maze;
 			String positions;
 			Position startPos, goalPos;
@@ -394,7 +416,7 @@ public abstract class MVPModel extends Observable implements IModel {
 			throw new ModelException("EXCEPTION: Maze '" + mazeName + "' doesn't exist.");
 		}
 
-		threadPool.execute(new Runnable() {
+		getThreadPool().execute(new Runnable() {
 			Maze3d maze;
 			String[] positionInts = position.split(" ");
 			Position curr = new Position(Integer.parseInt(positionInts[0]), Integer.parseInt(positionInts[1]),

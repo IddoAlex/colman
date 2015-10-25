@@ -1,6 +1,11 @@
 package gui;
 
 import java.io.File;
+import java.util.Collections;
+import java.util.LinkedList;
+import java.util.Timer;
+import java.util.TimerTask;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.KeyListener;
@@ -14,6 +19,7 @@ import org.eclipse.swt.widgets.Listener;
 
 import algorithms.mazeGenerators.Position;
 import search.Solution;
+import search.State;
 import view.IDisplayable;
 import view.IMazeDisplayable;
 import view.ISolutionDisplayable;
@@ -28,15 +34,18 @@ public class MyObservableGUI extends MVPView {
 	String loadMazeFile;
 
 	String currMazeName;
-	String currAlgorithm = "air";
 
+	Position startPosition;
 	Position currPosition;
 	Position endPosition;
 
 	Button selectedCrossSection;
 
-	boolean isMazeCompleted = false;
+	boolean isMazeSolved = false;
 	Image victoryImage;
+
+	Timer timer;
+	TimerTask task;
 
 	public MyObservableGUI() {
 		win = new MazeWindow("Maze Puzzle", 500, 300);
@@ -56,7 +65,7 @@ public class MyObservableGUI extends MVPView {
 			if (displayable instanceof IMazeDisplayable) {
 				IMazeDisplayable mazeDisplayable = (IMazeDisplayable) displayable;
 				win.setMazeData(mazeDisplayable.getMazeCrossSection());
-			} else if(displayable instanceof ISolutionDisplayable<?>) {
+			} else if (displayable instanceof ISolutionDisplayable<?>) {
 				ISolutionDisplayable<Position> positionSolution = (ISolutionDisplayable<Position>) displayable;
 				Solution<Position> solution = positionSolution.getSolution();
 				solveMaze(solution);
@@ -78,10 +87,14 @@ public class MyObservableGUI extends MVPView {
 					currMazeName = notification.split(" ")[1].split("'")[1];
 					setChanged();
 					notifyObservers("get positions " + currMazeName);
-					isMazeCompleted = false;
+					isMazeSolved = false;
 					break;
 				case "positions":
 					String[] posValues = notification.split(" ");
+					int startHeight = Integer.parseInt(posValues[0]);
+					int startWidth = Integer.parseInt(posValues[1]);
+					int startLength = Integer.parseInt(posValues[2]);
+					startPosition = new Position(startHeight, startWidth, startLength);
 					int goalHeight = Integer.parseInt(posValues[3]);
 					int goalWidth = Integer.parseInt(posValues[4]);
 					int goalLength = Integer.parseInt(posValues[5]);
@@ -98,9 +111,16 @@ public class MyObservableGUI extends MVPView {
 					checkVictory();
 					break;
 				case "solve":
-					currMazeName = notification.split(" ")[1].split("'")[1];
-					setChanged();
-					notifyObservers("display solution " + currMazeName);
+					if (currPosition.equals(startPosition)) {
+						currMazeName = notification.split(" ")[1].split("'")[1];
+						setChanged();
+						notifyObservers("display solution " + currMazeName);
+					} else {
+						MessageBoxCreator.createErrorMessageBox(win.shell, "Current position must be the starting position.");
+					}
+					break;
+				case "set_algorithm":
+					setAlgorithm(notification);
 					break;
 				default:
 					MessageBoxCreator.createNotificationMessageBox(win.shell, message);
@@ -111,15 +131,69 @@ public class MyObservableGUI extends MVPView {
 	}
 
 	private void solveMaze(Solution<Position> solution) {
-		// TODO
-		// Timer task
+		LinkedList<Integer> eventList = getKeyMoveList(solution.getSolutionList());
+		timer = new Timer();
+		task = new TimerTask() {
+			boolean allKeysClicked = false;
+
+			@Override
+			public void run() {
+				if (eventList.isEmpty()) {
+					allKeysClicked = true;
+				} else {
+					simulateKeyPress(eventList.pop());
+				}
+
+				if (allKeysClicked) {
+					closeTimerTask();
+				}
+			}
+		};
+
+		timer.scheduleAtFixedRate(task, 0, 500);
+	}
+
+	protected void closeTimerTask() {
+		task.cancel();
+		timer.cancel();
+	}
+
+	private LinkedList<Integer> getKeyMoveList(LinkedList<State<Position>> solutionList) {
+		LinkedList<State<Position>> copySolutionList = new LinkedList<>();
+		copySolutionList.addAll(solutionList);
+		Collections.reverse(copySolutionList);
+		LinkedList<Integer> eventList = new LinkedList<>();
+		Position last = copySolutionList.pop().getState();
+		int swtMove;
+
+		for (State<Position> state : copySolutionList) {
+			swtMove = getEventDiff(last, state.getState());
+			eventList.add(swtMove);
+			last = state.getState();
+		}
+
+		return eventList;
+	}
+
+	private Integer getEventDiff(Position last, Position curr) {
+		Integer retVal = 0;
+
+		if (last.getHeight() != curr.getHeight()) {
+			retVal = last.getHeight() > curr.getHeight() ? SWT.PAGE_DOWN : SWT.PAGE_UP;
+		} else if (last.getWidth() != curr.getWidth()) {
+			retVal = last.getWidth() > curr.getWidth() ? SWT.ARROW_LEFT : SWT.ARROW_RIGHT;
+		} else if (last.getLength() != curr.getLength()) {
+			retVal = last.getLength() > curr.getLength() ? SWT.ARROW_UP : SWT.ARROW_DOWN;
+		}
+
+		return retVal;
 	}
 
 	private void checkVictory() {
 		if (currPosition.equals(endPosition)) {
 			// TODO
 			MessageBoxCreator.createMessageBox(win.shell, SWT.HOME, "Victory!", "Good job!\nMaze completed");
-			isMazeCompleted = true;
+			isMazeSolved = true;
 		}
 	}
 
@@ -355,7 +429,7 @@ public class MyObservableGUI extends MVPView {
 					break;
 				}
 
-				if (direction != "" && currMazeName != null && currPosition != null && !isMazeCompleted) {
+				if (direction != "" && currMazeName != null && currPosition != null && !isMazeSolved) {
 					setChanged();
 					notifyObservers("move direction " + direction + " " + currMazeName + " " + currPosition.getHeight()
 							+ " " + currPosition.getWidth() + " " + currPosition.getLength());
@@ -394,8 +468,16 @@ public class MyObservableGUI extends MVPView {
 			}
 		});
 	}
-	
-	public void setAlgorithm(String algorithm) {
-		currAlgorithm = algorithm;
+
+	private void simulateKeyPress(int keyCode) {
+		win.maze.getDisplay().syncExec(new Runnable() {
+
+			@Override
+			public void run() {
+				Event e = new Event();
+				e.keyCode = keyCode;
+				win.maze.notifyListeners(SWT.KeyDown, e);
+			}
+		});
 	}
 }

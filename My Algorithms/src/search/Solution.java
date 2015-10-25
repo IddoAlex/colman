@@ -41,6 +41,10 @@ public class Solution<T> {
 		}
 	}
 	
+	public LinkedList<State<T>> getSolutionList() {
+		return list;
+	}
+	
 	public String toString() {
 		String solutionString = "";
 		
