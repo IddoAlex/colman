@@ -45,9 +45,9 @@ public abstract class MVPModel extends Observable implements IModel {
 	ExecutorService threadPool;
 
 	File mapsFile;
-	
+
 	int numThreadsPool;
-	
+
 	public MVPModel() {
 		mapsFile = new File("maps.bin");
 	}
@@ -282,13 +282,22 @@ public abstract class MVPModel extends Observable implements IModel {
 			@Override
 			public void run() {
 				try {
-					fos = new FileOutputStream(mapsFile, true);
+					fos = new FileOutputStream(mapsFile, false);
 					gos = new GZIPOutputStream(fos);
 					oos = new ObjectOutputStream(gos);
 
-					oos.writeObject(map);
-					oos.writeObject(algorithmMap);
-					oos.writeObject(solutionMap);
+					if (map != null) {
+						oos.writeObject(map);
+					}
+
+					if (algorithmMap != null) {
+						oos.writeObject(algorithmMap);
+					}
+			
+					if (solutionMap != null) {
+						oos.writeObject(solutionMap);
+					}
+
 					oos.flush();
 				} catch (IOException e) {
 					setChanged();
@@ -327,16 +336,16 @@ public abstract class MVPModel extends Observable implements IModel {
 	public void setAmountThreads(int numThreads) {
 		numThreadsPool = numThreads;
 	}
-	
+
 	private ExecutorService getThreadPool() {
 		if (threadPool == null) {
-			if(numThreadsPool < 1) {
+			if (numThreadsPool < 1) {
 				numThreadsPool = DEFAULT_NUM_THREADS;
 			}
-			
+
 			threadPool = Executors.newFixedThreadPool(numThreadsPool);
 		}
-		
+
 		return threadPool;
 	}
 
@@ -369,7 +378,7 @@ public abstract class MVPModel extends Observable implements IModel {
 				try {
 					Properties p = new Properties();
 					p.load(new FileInputStream(fileName));
-					
+
 					// The only dynamic parameter..
 					String newAlgorithm = p.getProperty("Solving Algorithm");
 					setChanged();

@@ -1,12 +1,14 @@
 package search;
 
+import java.io.Serializable;
+
 // TODO: Auto-generated Javadoc
 /**
  * The Interface Searcher.
  *
  * @param <T> the generic type
  */
-public interface Searcher<T> {
+public interface Searcher<T> extends Serializable {
 	
 	/**
 	 * Search.

@@ -1,5 +1,6 @@
 package search;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -9,33 +10,47 @@ import java.util.PriorityQueue;
 
 // TODO: Auto-generated Javadoc
 /**
- * BFSSearcher extends CommonSearcher.
- * Finds a solution to a given maze using the Best-First-Search algorithm,
- * having the cost be based off the distance of each state from the beginning of the maze.
+ * BFSSearcher extends CommonSearcher. Finds a solution to a given maze using
+ * the Best-First-Search algorithm, having the cost be based off the distance of
+ * each state from the beginning of the maze.
  *
  * @author Iddo
  * @version 1.0
- * @param <T> Generic
+ * @param <T>
+ *            Generic
  */
-public class BFSSearcher<T> extends CommonSearcher<T> {
-	
+public class BFSSearcher<T> extends CommonSearcher<T> implements Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6545878451575448027L;
+
 	/**
 	 * Instantiates a new BFS searcher.
 	 */
 	public BFSSearcher() {
+		initDefaultList();
+	}
+	
+	public BFSSearcher(int num) {
+		initDefaultList();
+	}
+
+	public void initDefaultList() {
 		openList = new PriorityQueue<State<T>>(new Comparator<State<T>>() {
-			public int compare(State<T> o1, State<T> o2){
-				return (int)(o1.getCost() - o2.getCost());
+			public int compare(State<T> o1, State<T> o2) {
+				return (int) (o1.getCost() - o2.getCost());
 			}
 		});
 	}
 
 	/**
-	 * Best First Search algorithm.
-	 * Uses a PriorityQueue for open states,
-	 * and a HashSet for closed (seen) states.
+	 * Best First Search algorithm. Uses a PriorityQueue for open states, and a
+	 * HashSet for closed (seen) states.
 	 *
-	 * @param s the s
+	 * @param s
+	 *            the searchable
 	 * @return the solution
 	 */
 	@Override
@@ -56,7 +71,7 @@ public class BFSSearcher<T> extends CommonSearcher<T> {
 																		// implemented
 			for (State<T> state : successors) {
 				state.setCameFrom(n);
-				state.setCost(n.getCost()+1);
+				state.setCost(n.getCost() + 1);
 				if (!(closedSet.contains(state)) && !(openList.contains(state))) {
 					addToOpenList(state);
 				} else {
@@ -76,9 +91,12 @@ public class BFSSearcher<T> extends CommonSearcher<T> {
 						State<T> curr = it.next();
 						if (state.equals(curr)) {
 							if (state.getCost() < curr.getCost()) {
-								if (!openHas) { // If it's not in the opened list, add the state with the better cost to the open list.
+								if (!openHas) { // If it's not in the opened
+												// list, add the state with the
+												// better cost to the open list.
 									openList.add(state);
-								} else { // if it's already in open list, adjust it's cost and set parent
+								} else { // if it's already in open list, adjust
+											// it's cost and set parent
 									it.remove();
 									col.add(curr);
 								}

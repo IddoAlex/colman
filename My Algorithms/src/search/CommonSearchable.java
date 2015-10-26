@@ -9,5 +9,10 @@ package search;
  * @param <T> the generic type
  */
 public abstract class CommonSearchable<T> implements Searchable<T> {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	
 }

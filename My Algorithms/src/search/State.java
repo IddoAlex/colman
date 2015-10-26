@@ -1,13 +1,20 @@
 package search;
 
+import java.io.Serializable;
+
 // TODO: Auto-generated Javadoc
 /**
  * The Class State.
  *
  * @param <T> the generic type
  */
-public class State<T> {
+public class State<T> implements Serializable {
 	
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 550240802931656281L;
+
 	/** The state. */
 	private T state; // the state represented
 	
@@ -16,6 +23,10 @@ public class State<T> {
 	
 	/** The came from. */
 	private State<T> cameFrom; // the state we came from to this state
+	
+	public State() {
+		cost=0;
+	}
 
 	/**
 	 * Instantiates a new state.
@@ -73,6 +84,10 @@ public class State<T> {
 	 */
 	public void setCost(double cost) {
 		this.cost = cost;
+	}
+	
+	public void setState(T aState) {
+		this.state = aState;
 	}
 
 	/**

@@ -150,7 +150,7 @@ public class MyObservableGUI extends MVPView {
 			}
 		};
 
-		timer.scheduleAtFixedRate(task, 0, 500);
+		timer.scheduleAtFixedRate(task, 0, 400);
 	}
 
 	protected void closeTimerTask() {

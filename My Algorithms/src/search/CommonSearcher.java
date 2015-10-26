@@ -1,5 +1,6 @@
 package search;
 
+import java.io.Serializable;
 import java.util.PriorityQueue;
 
 // TODO: Auto-generated Javadoc
@@ -13,7 +14,12 @@ import java.util.PriorityQueue;
  * @version 1.0
  * @param <T> the generic type
  */
-public abstract class CommonSearcher<T> implements Searcher<T> {
+public abstract class CommonSearcher<T> implements Searcher<T>, Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	/** The open list. */
 	protected PriorityQueue<State<T>> openList;
@@ -25,7 +31,6 @@ public abstract class CommonSearcher<T> implements Searcher<T> {
 	 * Instantiates a new common searcher.
 	 */
 	public CommonSearcher() {
-		openList = new PriorityQueue<State<T>>();
 	}
 
 	/* (non-Javadoc)

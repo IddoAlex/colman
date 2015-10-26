@@ -52,7 +52,7 @@ public abstract class CommonModel implements MVCModel {
 	 * Inits the algorithm map.
 	 */
 	private void initAlgorithmMap() {
-		algorithmMap.put("bfs", new BFSSearcher<Position>());
+		algorithmMap.put("bfs", new BFSSearcher<Position>(0));
 		algorithmMap.put("manhattan", new AstarSearcher<Position>(new MazeManhattanHeuristic()));
 		algorithmMap.put("air", new AstarSearcher<Position>(new MazeAirHeuristic()));
 	}

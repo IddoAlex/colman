@@ -1,5 +1,7 @@
 package search;
 
+import java.io.Serializable;
+
 // TODO: Auto-generated Javadoc
 /**
  * Defines a function which all heuristics must have.
@@ -8,7 +10,7 @@ package search;
  * @version 1.0
  * @param <T> the generic type
  */
-public interface Heuristic<T> {
+public interface Heuristic<T> extends Serializable {
 	
 	/**
 	 * Gets the heuristic cost.

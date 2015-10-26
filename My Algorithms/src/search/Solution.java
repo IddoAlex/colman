@@ -1,5 +1,6 @@
 package search;
 
+import java.io.Serializable;
 import java.util.LinkedList;
 
 // TODO: Auto-generated Javadoc
@@ -8,8 +9,12 @@ import java.util.LinkedList;
  *
  * @param <T> the generic type
  */
-public class Solution<T> {
+public class Solution<T> implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 	/** The list. */
 	private LinkedList<State<T>> list;
 	

@@ -1,10 +1,15 @@
 package algorithms.mazeGenerators;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 
-public class Maze3d {
+public class Maze3d implements Serializable {
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4418715268185881903L;
 	/*
 	 * X - Length Y - Height Z - Width int[Y][Z][X] maze;
 	 */

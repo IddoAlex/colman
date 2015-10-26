@@ -20,8 +20,8 @@ public class Demo {
 		
 		System.out.println("Entry: " +maze.getStartPosition() + ", Goal: " + maze.getGoalPosition());
 		
-		BFSSearcher<Position> bfs = new BFSSearcher<>();
-
+		BFSSearcher<Position> bfs = new BFSSearcher<>(0);
+		
 		Maze3dSearchable mazeAdapter = new Maze3dSearchable(maze);
 
 		AstarSearcher<Position> star1 = new AstarSearcher<>(new MazeAirHeuristic());

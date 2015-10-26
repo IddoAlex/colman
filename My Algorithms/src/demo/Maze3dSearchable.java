@@ -9,6 +9,10 @@ import search.State;
 
 public class Maze3dSearchable implements Searchable<Position> {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 3115395649153098467L;
 	private Maze3d _maze;
 	
 	public Maze3dSearchable(Maze3d maze) {

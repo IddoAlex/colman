@@ -8,6 +8,11 @@ import algorithms.mazeGenerators.Position;
  */
 public class MazeAirHeuristic implements Heuristic<Position> {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 4271519720194952129L;
+
 	/* (non-Javadoc)
 	 * @see search.Heuristic#getHeuristicCost(search.State, search.State)
 	 */

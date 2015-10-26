@@ -14,9 +14,15 @@ import java.util.PriorityQueue;
  */
 public class AstarSearcher<T> extends BFSSearcher<T> {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -6332645588872909455L;
 	/** The heuristic. */
 	private Heuristic<T> heuristic;
 
+	public AstarSearcher() {}
+	
 	/**
 	 * Instantiates a new astar searcher.
 	 *

@@ -1,9 +1,15 @@
 package algorithms.mazeGenerators;
 
+import java.io.Serializable;
 import java.nio.ByteBuffer;
 
-public class Position {
+public class Position implements Serializable {
 
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -3017273643559091051L;
+	
 	private int m_height = 0;
 	private int m_width = 0;
 	private int m_length = 0;

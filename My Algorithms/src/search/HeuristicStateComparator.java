@@ -1,5 +1,6 @@
 package search;
 
+import java.io.Serializable;
 import java.util.Comparator;
 
 // TODO: Auto-generated Javadoc
@@ -9,7 +10,12 @@ import java.util.Comparator;
  * @author Iddo
  * @param <T> the generic type
  */
-public class HeuristicStateComparator<T> implements Comparator<State<T>> {
+public class HeuristicStateComparator<T> implements Comparator<State<T>>, Serializable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = -5036886696875842387L;
 
 	/** The heuristic. */
 	private Heuristic<T> heuristic;
@@ -37,6 +43,14 @@ public class HeuristicStateComparator<T> implements Comparator<State<T>> {
 		// heuristic
 		return (int) ((heuristic.getHeuristicCost(o1, goal) + o1.getCost())
 				- (heuristic.getHeuristicCost(o2, goal) + o2.getCost()));
+	}
+
+	public void setHeuristic(Heuristic<T> heuristic) {
+		this.heuristic = heuristic;
+	}
+
+	public void setGoal(State<T> goal) {
+		this.goal = goal;
 	}
 
 }

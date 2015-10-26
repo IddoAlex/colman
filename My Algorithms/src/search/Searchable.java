@@ -1,5 +1,6 @@
 package search;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 
 // TODO: Auto-generated Javadoc
@@ -8,7 +9,7 @@ import java.util.ArrayList;
  *
  * @param <T> the generic type
  */
-public interface Searchable<T> {
+public interface Searchable<T> extends Serializable {
 	
 	/**
 	 * Gets the start state.
