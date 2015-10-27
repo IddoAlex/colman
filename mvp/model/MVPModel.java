@@ -1,11 +1,16 @@
 package model;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.io.PrintWriter;
+import java.net.Socket;
 import java.nio.ByteBuffer;
 import java.util.HashMap;
 import java.util.Observable;
@@ -20,14 +25,12 @@ import java.util.zip.GZIPOutputStream;
 import algorithms.mazeGenerators.Maze3d;
 import algorithms.mazeGenerators.MyMazeGenerator;
 import algorithms.mazeGenerators.Position;
-import demo.Maze3dSearchable;
 import exceptions.ColmanException;
 import exceptions.CommandException;
 import exceptions.ModelException;
 import io.MyCompressorOutputStream;
 import io.MyDecompressorInputStream;
 import presenter.Properties;
-import search.Searcher;
 import search.Solution;
 
 public abstract class MVPModel extends Observable implements IModel {
@@ -38,8 +41,6 @@ public abstract class MVPModel extends Observable implements IModel {
 
 	HashMap<String, Maze3d> map;
 
-	HashMap<String, Searcher<Position>> algorithmMap;
-
 	HashMap<String, Solution<Position>> solutionMap;
 
 	ExecutorService threadPool;
@@ -49,7 +50,6 @@ public abstract class MVPModel extends Observable implements IModel {
 	int numThreadsPool;
 
 	public MVPModel() {
-		mapsFile = new File("maps.bin");
 	}
 
 	@Override
@@ -205,26 +205,51 @@ public abstract class MVPModel extends Observable implements IModel {
 		notifyObservers("SIZE: Maze '" + mazeName + "' total memory size: " + totalMazeSize + " bytes.");
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
 	public void solve(String name, String algorithm) throws ModelException {
-
-		Maze3d maze = getMaze(name);
-		Searcher<Position> searcher = getAlgorithm(algorithm);
-		Future<Solution<Position>> futureSolution = getThreadPool().submit(new Callable<Solution<Position>>() {
-
-			@Override
-			public Solution<Position> call() throws Exception {
-				return searcher.search(new Maze3dSearchable(maze));
-			}
-		});
-
+		/*
+		 * Open socket, send algorithm name, receive 'alg' from server, send
+		 * maze to server, receive Solution from server.
+		 */
+		Maze3d maze;
+		Solution<Position> solution;
+		PrintWriter writerToServer = null;
+		ObjectOutputStream mazeToServer = null;
+		Socket theServer;
 		try {
-			solutionMap.put(name, futureSolution.get());
+			theServer = new Socket("localhost", 5400);
+			writerToServer = new PrintWriter(theServer.getOutputStream());
+			writerToServer.println(algorithm);
+			writerToServer.flush();
+
+			BufferedReader in = new BufferedReader(new InputStreamReader(theServer.getInputStream()));
+			System.out.println(in.readLine());// alg
+
+			maze = getMaze(name);
+			mazeToServer = new ObjectOutputStream(theServer.getOutputStream());
+			mazeToServer.writeObject(maze);
+			mazeToServer.flush();
+
+			ObjectInputStream solutionFromServer = new ObjectInputStream(theServer.getInputStream());
+			solution = (Solution<Position>) solutionFromServer.readObject();
+
+			solutionMap.put(name, solution);
 			setChanged();
 			notifyObservers("SOLVE: Maze '" + name + "' was solved.");
-		} catch (InterruptedException | ExecutionException e) {
+		} catch (IOException | ClassNotFoundException e) {
 			setChanged();
-			notifyObservers("EXCEPTION: Solving error occured.");
+			notifyObservers("EXCEPTION: Server Socket error");
+		} finally {
+			if (writerToServer != null) {
+				writerToServer.close();
+			}
+			try {
+				if (mazeToServer != null) {
+					mazeToServer.close();
+				}
+			} catch (IOException e) {
+			}
 		}
 	}
 
@@ -289,14 +314,14 @@ public abstract class MVPModel extends Observable implements IModel {
 					if (map != null) {
 						oos.writeObject(map);
 					}
-
-					if (algorithmMap != null) {
-						oos.writeObject(algorithmMap);
-					}
-			
 					if (solutionMap != null) {
 						oos.writeObject(solutionMap);
 					}
+
+					/*
+					 * if (algorithmMap != null) {
+					 * oos.writeObject(algorithmMap); }
+					 */
 
 					oos.flush();
 				} catch (IOException e) {
@@ -307,6 +332,11 @@ public abstract class MVPModel extends Observable implements IModel {
 						if (oos != null) {
 							oos.close();
 						}
+
+						if (gos != null) {
+							gos.close();
+						}
+
 						if (fos != null) {
 							fos.close();
 						}
@@ -474,20 +504,6 @@ public abstract class MVPModel extends Observable implements IModel {
 				}
 			}
 		});
-	}
-
-	private Searcher<Position> getAlgorithm(String algorithmName) throws ModelException {
-		Searcher<Position> algorithm;
-		if (!validateName(algorithmName)) {
-			throw new ModelException("EXCEPTION: No name given for algorithm");
-		}
-
-		algorithm = algorithmMap.get(algorithmName);
-		if (algorithm == null) {
-			throw new ModelException("EXCEPTION: Maze named '" + algorithmName + "' not found");
-		}
-
-		return algorithm;
 	}
 
 	private boolean validateName(String name) {

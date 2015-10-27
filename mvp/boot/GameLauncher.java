@@ -34,7 +34,7 @@ public class GameLauncher {
 	}
 
 	private void init() {
-		
+		//TODO
 		properties = new Properties();
 		try {
 			properties.load(new FileInputStream(propertyFile));

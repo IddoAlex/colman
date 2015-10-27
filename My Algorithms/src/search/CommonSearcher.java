@@ -1,6 +1,5 @@
 package search;
 
-import java.io.Serializable;
 import java.util.PriorityQueue;
 
 // TODO: Auto-generated Javadoc
@@ -14,7 +13,7 @@ import java.util.PriorityQueue;
  * @version 1.0
  * @param <T> the generic type
  */
-public abstract class CommonSearcher<T> implements Searcher<T>, Serializable {
+public abstract class CommonSearcher<T> implements Searcher<T> {
 
 	/**
 	 * 

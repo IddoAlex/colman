@@ -1,6 +1,5 @@
 package search;
 
-import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -19,7 +18,7 @@ import java.util.PriorityQueue;
  * @param <T>
  *            Generic
  */
-public class BFSSearcher<T> extends CommonSearcher<T> implements Serializable {
+public class BFSSearcher<T> extends CommonSearcher<T> {
 
 	/**
 	 * 
