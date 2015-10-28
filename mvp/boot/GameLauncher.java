@@ -1,7 +1,10 @@
 package boot;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+
 import exceptions.ColmanException;
 import gui.MyObservableGUI;
 import model.MVPModel;
@@ -20,6 +23,7 @@ public class GameLauncher {
 	String viewToUse;
 	int numThreads;
 	
+	File file;
 	MVPModel model;
 	MVPView view;
 	MVPPresenter presenter;
@@ -30,11 +34,16 @@ public class GameLauncher {
 	
 	public GameLauncher(String aPropertyFile) {
 		propertyFile = aPropertyFile;
+		file = new File(propertyFile);
+		
+		if(!file.exists()) {
+			initProperties();
+		}
+		
 		init();
 	}
 
 	private void init() {
-		//TODO
 		properties = new Properties();
 		try {
 			properties.load(new FileInputStream(propertyFile));
@@ -43,7 +52,6 @@ public class GameLauncher {
 			numThreads = Integer.parseInt(properties.getProperty("NumThreads"));
 			viewToUse = properties.getProperty("View");
 		} catch (FileNotFoundException | ColmanException | NumberFormatException e) {
-			System.out.println("For tests: exception while loading file: " +e.getMessage());
 			// default values:
 			generationAlgorithm = "good";
 			viewToUse = "MVP";
@@ -63,6 +71,20 @@ public class GameLauncher {
 
 	public void start() {
 		view.start();
+	}
+	
+	private void initProperties() {
+		Properties p = new Properties();
+		p.addProperty("Solving Algorithm", "manhatten");
+		p.addProperty("NumThreads", "10");
+		p.addProperty("ViewToUse", "MVP");
+		p.addProperty("port", "5400");
+		p.addProperty("ServerName", "localhost");
+		
+		try {
+			p.save(new FileOutputStream(propertyFile));
+		} catch (FileNotFoundException e) {
+		}
 	}
 
 }

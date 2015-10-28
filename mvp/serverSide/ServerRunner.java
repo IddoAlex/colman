@@ -33,7 +33,7 @@ public class ServerRunner {
 			properties.load(new FileInputStream(serverPropertyFile));
 			port = Integer.parseInt(properties.getProperty("Port"));
 			numClients = Integer.parseInt(properties.getProperty("NumClients"));
-		} catch (FileNotFoundException | ColmanException e) {
+		} catch (FileNotFoundException | ColmanException |NumberFormatException e) {
 			port = DEFAULT_PORT;
 			numClients = DEFAULT_NUM_CLIENTS;
 			properties.addProperty("Port", port + "");

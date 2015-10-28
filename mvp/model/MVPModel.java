@@ -45,6 +45,10 @@ public abstract class MVPModel extends Observable implements IModel {
 
 	ExecutorService threadPool;
 
+	String serverName = "localhost";
+
+	int port = 5400;
+
 	File mapsFile;
 
 	int numThreadsPool;
@@ -239,13 +243,13 @@ public abstract class MVPModel extends Observable implements IModel {
 			hasSolution = true;
 		} else {
 			try {
-				theServer = new Socket("localhost", 5400);
+				theServer = new Socket(serverName, port);
 				writerToServer = new PrintWriter(theServer.getOutputStream());
 				writerToServer.println(algorithm);
 				writerToServer.flush();
 
 				BufferedReader in = new BufferedReader(new InputStreamReader(theServer.getInputStream()));
-				System.out.println(in.readLine());// alg
+				in.readLine();// alg
 
 				mazeToServer = new ObjectOutputStream(theServer.getOutputStream());
 				mazeToServer.writeObject(maze);
@@ -272,11 +276,11 @@ public abstract class MVPModel extends Observable implements IModel {
 				}
 			}
 		}
-		
-		if (tempStartPosition!=null) {
+
+		if (tempStartPosition != null) {
 			maze.setEntryPosition(tempStartPosition);
 		}
-		
+
 		if (hasSolution) {
 			setChanged();
 			notifyObservers("SOLVE: Maze '" + name + "' was solved.");
@@ -288,30 +292,30 @@ public abstract class MVPModel extends Observable implements IModel {
 		Maze3d maze;
 		String[] splitted = args[0].split(" ");
 		String mazeName = splitted[0];
-		
+
 		maze = getMaze(mazeName);
-		
+
 		Position currPosition = null;
 		Position tempStartPosition = null;
-		
-		if(splitted.length == 4) {
+
+		if (splitted.length == 4) {
 			int posHeight = Integer.parseInt(splitted[2]);
 			int posWidth = Integer.parseInt(splitted[3]);
 			int posLength = Integer.parseInt(splitted[1]);
 			currPosition = new Position(posHeight, posWidth, posLength);
 		}
-		
-		if(!maze.getStartPosition().equals(currPosition)) {
+
+		if (!maze.getStartPosition().equals(currPosition)) {
 			tempStartPosition = maze.getStartPosition();
 			maze.setEntryPosition(currPosition);
 		}
-		
+
 		Solution<Position> solution = solutionMap.get(maze);
-		
-		if(tempStartPosition!=null) {
+
+		if (tempStartPosition != null) {
 			maze.setEntryPosition(tempStartPosition);
 		}
-		
+
 		if (solution == null) {
 			throw new ModelException("Solution for maze '" + mazeName + "' not found.");
 		}
@@ -463,12 +467,19 @@ public abstract class MVPModel extends Observable implements IModel {
 				try {
 					Properties p = new Properties();
 					p.load(new FileInputStream(fileName));
-
-					// The only dynamic parameter..
+					
 					String newAlgorithm = p.getProperty("Solving Algorithm");
-					setChanged();
+					String portString = p.getProperty("port");
+					
+					if(portString!=null) {
+						setPort(Integer.parseInt(portString));
+					}
+					
+					String propertyServerName = p.getProperty("ServerName");
+					setServerName(propertyServerName);
+					
 					notifyObservers("SET_ALGORITHM: " + newAlgorithm);
-				} catch (NullPointerException | FileNotFoundException | ColmanException e) {
+				} catch (NullPointerException | FileNotFoundException | ColmanException | NumberFormatException e) {
 					setChanged();
 					notifyObservers("EXCEPTION: " + e.getMessage());
 				}
@@ -563,5 +574,17 @@ public abstract class MVPModel extends Observable implements IModel {
 
 	private boolean validateName(String name) {
 		return name != null && !name.isEmpty();
+	}
+
+	public void setServerName(String serverName) {
+		if (serverName != null) {
+			this.serverName = serverName;
+		}
+	}
+	
+	public void setPort(int port) {
+		if(port > 0) {
+			this.port = port;
+		}
 	}
 }

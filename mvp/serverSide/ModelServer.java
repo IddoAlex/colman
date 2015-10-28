@@ -13,15 +13,15 @@ public class ModelServer {
 
 	int port;
 	ServerSocket server;
-	
+
 	ClientHandler clientHandler;
 	int numOfClients;
 	ExecutorService threadpool;
-	
+
 	volatile boolean stop;
-	
+
 	Thread mainServerThread;
-	
+
 	public ModelServer(int port, ClientHandler handler, int numOfClients) {
 		this.port = port;
 		this.numOfClients = numOfClients;
@@ -33,63 +33,67 @@ public class ModelServer {
 	}
 
 	public void start() throws Exception {
-		if(mainServerThread != null) {
+		if (mainServerThread != null) {
 			throw new Exception("Server already running...");
 		}
-		server=new ServerSocket(port);
-		server.setSoTimeout(10*1000);
-		threadpool=Executors.newFixedThreadPool(numOfClients);
 		
+		server = new ServerSocket(port);
+		server.setSoTimeout(10 * 1000);
+		threadpool = Executors.newFixedThreadPool(numOfClients);
+
 		controller.display("Server is up, waiting for clients...");
-		
-		mainServerThread=new Thread(new Runnable() {			
+
+		mainServerThread = new Thread(new Runnable() {
 			@Override
 			public void run() {
-				while(!stop){
+				while (!stop) {
 					try {
-						final Socket someClient=server.accept();
-						if(someClient!=null){
-							threadpool.execute(new Runnable() {									
+						final Socket someClient = server.accept();
+						if (someClient != null) {
+							threadpool.execute(new Runnable() {
 								@Override
 								public void run() {
-									try{
+									try {
 										controller.display("Handling client...");
-										clientHandler.handleClient(someClient.getInputStream(), someClient.getOutputStream());
+										clientHandler.handleClient(someClient.getInputStream(),
+												someClient.getOutputStream());
 										someClient.close();
 										controller.display("Done handling client");
-									}catch(IOException e){
+									} catch (IOException e) {
 										controller.display(e.getMessage());
-									}									
+									}
 								}
-							});								
+							});
 						}
-					}
-					catch (SocketTimeoutException e){
+					} catch (SocketTimeoutException e) {
 						controller.display("no client connected...");
-					} 
-					catch (IOException e) {
+					} catch (IOException e) {
 						controller.display(e.getMessage());
 					}
 				}
 			} // end of the mainServerThread task
 		});
-		
+
 		mainServerThread.start();
 	}
 
 	public void stop() throws Exception {
-		stop=true;	
-		// do not execute jobs in queue, continue to execute running threads
-		controller.display("shutting server down");
-		threadpool.shutdown();
-		// wait 10 seconds over and over again until all running jobs have finished
-		@SuppressWarnings("unused")
-		boolean allTasksCompleted=false;
-		while(!(allTasksCompleted=threadpool.awaitTermination(10, TimeUnit.SECONDS)));
-		
-		mainServerThread.join();		
-		
-		server.close();
-		controller.display("server is safely closed");
+		if (!stop) {
+			stop = true;
+			// do not execute jobs in queue, continue to execute running threads
+			controller.display("shutting server down");
+			threadpool.shutdown();
+			// wait 5 seconds over and over again until all running jobs have
+			// finished
+			@SuppressWarnings("unused")
+			boolean allTasksCompleted = false;
+			while (!(allTasksCompleted = threadpool.awaitTermination(5, TimeUnit.SECONDS)))
+				;
+
+			mainServerThread.join();
+
+			server.close();
+			controller.display("server is safely closed");
+		}
 	}
 }
