@@ -3,6 +3,7 @@ package gui;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyListener;
 import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.layout.RowLayout;
@@ -48,6 +49,8 @@ public class MazeWindow extends BasicWindow {
 	Label goalPositionLabel;
 	Label goalPositionText;
 
+	Image backgroundImage;
+	
 	MazeDisplayer maze;
 
 	SelectionListener exitSelectionListener;
@@ -139,6 +142,9 @@ public class MazeWindow extends BasicWindow {
 		exitButton.setText("Exit");
 		exitButton.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false, 1, 1));
 		exitButton.setEnabled(true);
+		
+		backgroundImage = new Image(display, "./resources/bar_image.jpg");
+		shell.setBackgroundImage(backgroundImage);
 	}
 
 	public void setMazeData(int[][] crossSection) {

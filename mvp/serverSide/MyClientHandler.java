@@ -33,6 +33,7 @@ public class MyClientHandler implements ClientHandler {
 
 	public MyClientHandler() {
 		threadPool = Executors.newFixedThreadPool(1);
+		algorithmMap = new HashMap<>();
 		initAlgorithmMap();
 	}
 

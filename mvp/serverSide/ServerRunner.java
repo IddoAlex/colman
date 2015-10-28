@@ -12,7 +12,7 @@ public class ServerRunner {
 	private static final int DEFAULT_PORT = 5400;
 	private static final int DEFAULT_NUM_CLIENTS = 5;
 	private static final String PROPERTY_SERVER_STRING = "serverProperty.xml";
-	
+
 	ModelServer model;
 	ViewServer view;
 	Properties properties;
@@ -36,8 +36,8 @@ public class ServerRunner {
 		} catch (FileNotFoundException | ColmanException e) {
 			port = DEFAULT_PORT;
 			numClients = DEFAULT_NUM_CLIENTS;
-			properties.addProperty("Port", port+"");
-			properties.addProperty("NumClients", numClients+"");
+			properties.addProperty("Port", port + "");
+			properties.addProperty("NumClients", numClients + "");
 			try {
 				properties.save(new FileOutputStream(serverPropertyFile));
 			} catch (FileNotFoundException e1) {

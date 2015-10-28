@@ -29,7 +29,7 @@ public class MyObservableModel extends MVPModel {
 			gis = new GZIPInputStream(fis);
 			ois = new ObjectInputStream(gis);
 			map = (HashMap<String, Maze3d>) ois.readObject();
-			solutionMap = (HashMap<String, Solution<Position>>) ois.readObject();
+			solutionMap = (HashMap<Maze3d, Solution<Position>>) ois.readObject();
 		} catch (IOException | ClassNotFoundException e) {
 			map = new HashMap<>();
 			solutionMap = new HashMap<>();

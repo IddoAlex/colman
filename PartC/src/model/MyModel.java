@@ -200,7 +200,7 @@ public class MyModel extends CommonModel {
 	 * @see model.IModel#solve(java.lang.String, java.lang.String)
 	 */
 	@Override
-	public void solve(String name, String algorithm) throws ModelException {
+	public void solve(String name, String algorithm, String... position) throws ModelException {
 
 		Maze3d maze = getMaze(name);
 		Searcher<Position> searcher = getAlgorithm(algorithm);

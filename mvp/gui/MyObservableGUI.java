@@ -111,13 +111,10 @@ public class MyObservableGUI extends MVPView {
 					checkVictory();
 					break;
 				case "solve":
-					if (currPosition.equals(startPosition)) {
-						currMazeName = notification.split(" ")[1].split("'")[1];
-						setChanged();
-						notifyObservers("display solution " + currMazeName);
-					} else {
-						MessageBoxCreator.createErrorMessageBox(win.shell, "Current position must be the starting position.");
-					}
+					currMazeName = notification.split(" ")[1].split("'")[1];
+					setChanged();
+					notifyObservers("display solution " + currMazeName + " " + currPosition.getLength() + " " 
+					+ currPosition.getHeight() + " " + currPosition.getWidth());
 					break;
 				case "set_algorithm":
 					setAlgorithm(notification);
@@ -150,9 +147,9 @@ public class MyObservableGUI extends MVPView {
 			}
 		};
 
-		timer.scheduleAtFixedRate(task, 0, 400);
+		timer.scheduleAtFixedRate(task, 0, 300);
 	}
-
+	
 	protected void closeTimerTask() {
 		task.cancel();
 		timer.cancel();
@@ -191,7 +188,6 @@ public class MyObservableGUI extends MVPView {
 
 	private void checkVictory() {
 		if (currPosition.equals(endPosition)) {
-			// TODO
 			MessageBoxCreator.createMessageBox(win.shell, SWT.HOME, "Victory!", "Good job!\nMaze completed");
 			isMazeSolved = true;
 		}
@@ -238,7 +234,8 @@ public class MyObservableGUI extends MVPView {
 			public void widgetSelected(SelectionEvent arg0) {
 				if (currMazeName != null && currAlgorithm != null) {
 					setChanged();
-					notifyObservers("solve " + currMazeName + " " + currAlgorithm);
+					notifyObservers("solve " + currMazeName + " " + currAlgorithm + " " + currPosition.getLength()
+					+ " " + currPosition.getHeight() + " " + currPosition.getWidth());
 				}
 			}
 

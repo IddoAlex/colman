@@ -41,7 +41,7 @@ public abstract class MVPModel extends Observable implements IModel {
 
 	HashMap<String, Maze3d> map;
 
-	HashMap<String, Solution<Position>> solutionMap;
+	HashMap<Maze3d, Solution<Position>> solutionMap;
 
 	ExecutorService threadPool;
 
@@ -207,56 +207,111 @@ public abstract class MVPModel extends Observable implements IModel {
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public void solve(String name, String algorithm) throws ModelException {
+	public void solve(String name, String algorithm, String... positions) throws ModelException {
 		/*
 		 * Open socket, send algorithm name, receive 'alg' from server, send
 		 * maze to server, receive Solution from server.
 		 */
 		Maze3d maze;
 		Solution<Position> solution;
+		Socket theServer;
 		PrintWriter writerToServer = null;
 		ObjectOutputStream mazeToServer = null;
-		Socket theServer;
-		try {
-			theServer = new Socket("localhost", 5400);
-			writerToServer = new PrintWriter(theServer.getOutputStream());
-			writerToServer.println(algorithm);
-			writerToServer.flush();
+		boolean hasSolution = false;
+		Position currPosition = null;
+		Position tempStartPosition = null;
 
-			BufferedReader in = new BufferedReader(new InputStreamReader(theServer.getInputStream()));
-			System.out.println(in.readLine());// alg
+		maze = getMaze(name);
 
-			maze = getMaze(name);
-			mazeToServer = new ObjectOutputStream(theServer.getOutputStream());
-			mazeToServer.writeObject(maze);
-			mazeToServer.flush();
+		if (positions != null && positions.length == 3) {
+			int posHeight = Integer.parseInt(positions[1]);
+			int posWidth = Integer.parseInt(positions[2]);
+			int posLength = Integer.parseInt(positions[0]);
+			currPosition = new Position(posHeight, posWidth, posLength);
+		}
 
-			ObjectInputStream solutionFromServer = new ObjectInputStream(theServer.getInputStream());
-			solution = (Solution<Position>) solutionFromServer.readObject();
+		if (!maze.getStartPosition().equals(currPosition)) {
+			tempStartPosition = maze.getStartPosition();
+			maze.setEntryPosition(currPosition);
+		}
 
-			solutionMap.put(name, solution);
+		if (solutionMap.containsKey(maze)) {
+			hasSolution = true;
+		} else {
+			try {
+				theServer = new Socket("localhost", 5400);
+				writerToServer = new PrintWriter(theServer.getOutputStream());
+				writerToServer.println(algorithm);
+				writerToServer.flush();
+
+				BufferedReader in = new BufferedReader(new InputStreamReader(theServer.getInputStream()));
+				System.out.println(in.readLine());// alg
+
+				mazeToServer = new ObjectOutputStream(theServer.getOutputStream());
+				mazeToServer.writeObject(maze);
+				mazeToServer.flush();
+
+				ObjectInputStream solutionFromServer = new ObjectInputStream(theServer.getInputStream());
+				solution = (Solution<Position>) solutionFromServer.readObject();
+
+				solutionMap.put(maze, solution);
+				hasSolution = true;
+
+			} catch (IOException | ClassNotFoundException e) {
+				setChanged();
+				notifyObservers("EXCEPTION: Server Socket error");
+			} finally {
+				if (writerToServer != null) {
+					writerToServer.close();
+				}
+				try {
+					if (mazeToServer != null) {
+						mazeToServer.close();
+					}
+				} catch (IOException e) {
+				}
+			}
+		}
+		
+		if (tempStartPosition!=null) {
+			maze.setEntryPosition(tempStartPosition);
+		}
+		
+		if (hasSolution) {
 			setChanged();
 			notifyObservers("SOLVE: Maze '" + name + "' was solved.");
-		} catch (IOException | ClassNotFoundException e) {
-			setChanged();
-			notifyObservers("EXCEPTION: Server Socket error");
-		} finally {
-			if (writerToServer != null) {
-				writerToServer.close();
-			}
-			try {
-				if (mazeToServer != null) {
-					mazeToServer.close();
-				}
-			} catch (IOException e) {
-			}
 		}
 	}
 
 	@Override
 	public void displaySolution(String[] args) throws ModelException {
-		String mazeName = args[0];
-		Solution<Position> solution = solutionMap.get(mazeName);
+		Maze3d maze;
+		String[] splitted = args[0].split(" ");
+		String mazeName = splitted[0];
+		
+		maze = getMaze(mazeName);
+		
+		Position currPosition = null;
+		Position tempStartPosition = null;
+		
+		if(splitted.length == 4) {
+			int posHeight = Integer.parseInt(splitted[2]);
+			int posWidth = Integer.parseInt(splitted[3]);
+			int posLength = Integer.parseInt(splitted[1]);
+			currPosition = new Position(posHeight, posWidth, posLength);
+		}
+		
+		if(!maze.getStartPosition().equals(currPosition)) {
+			tempStartPosition = maze.getStartPosition();
+			maze.setEntryPosition(currPosition);
+		}
+		
+		Solution<Position> solution = solutionMap.get(maze);
+		
+		if(tempStartPosition!=null) {
+			maze.setEntryPosition(tempStartPosition);
+		}
+		
 		if (solution == null) {
 			throw new ModelException("Solution for maze '" + mazeName + "' not found.");
 		}

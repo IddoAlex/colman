@@ -71,7 +71,7 @@ public interface IModel {
 	 * @param algorithm the algorithm
 	 * @throws ModelException the model exception
 	 */
-	public void solve(String name, String algorithm) throws ModelException;
+	public void solve(String name, String algorithm, String... position) throws ModelException;
 
 	/**
 	 * Display solution.

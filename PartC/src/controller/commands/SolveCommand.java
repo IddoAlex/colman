@@ -1,6 +1,5 @@
 package controller.commands;
 
-import java.util.ArrayList;
 import exceptions.ModelException;
 import model.IModel;
 import view.IView;
@@ -14,30 +13,36 @@ public class SolveCommand extends CommonCommand {
 	/**
 	 * Instantiates a new solve command.
 	 *
-	 * @param view the view
-	 * @param model the model
+	 * @param view
+	 *            the view
+	 * @param model
+	 *            the model
 	 */
 	public SolveCommand(IView view, IModel model) {
 		super(view, model);
 	}
 
-	/* (non-Javadoc)
+	/*
+	 * (non-Javadoc)
+	 * 
 	 * @see controller.commands.ICommand#doCommand(java.lang.String[])
 	 */
 	@Override
 	public void doCommand(String... args) {
 		String[] splitted = args[0].split(" ");
-		ArrayList<String> buffer = new ArrayList<>();
-		String mazeName;
-		String algorithmName = splitted[splitted.length-1];
-		
-		for (int i = 0; i < splitted.length-1; i++) {
-			buffer.add(splitted[i]);
+		String mazeName = splitted[0];
+		String algorithmName = splitted[1];
+		String[] positions = null;
+
+		if (splitted.length == 5) {
+			positions = new String[3];
+			for (int i = 0; i < 3; i++) {
+				positions[i] = splitted[2 + i];
+			}
 		}
-		
-		mazeName = String.join(" ", buffer);
+
 		try {
-			model.solve(mazeName,algorithmName);
+			model.solve(mazeName, algorithmName, positions);
 		} catch (ModelException e) {}
 	}
 }

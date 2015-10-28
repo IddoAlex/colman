@@ -45,7 +45,6 @@ public class GenerateMazeDialog extends BasicDialog {
 	protected void initWidgets() {
 		shell = new Shell(getParent(), SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
 		shell.setLayout(new GridLayout(12, true));
-		//shell.setSize(300, 200);
 		shell.setText("Generate maze");
 
 		nameLabel = new Label(shell, SWT.NULL);

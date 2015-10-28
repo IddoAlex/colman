@@ -33,9 +33,14 @@ public class ModelServer {
 	}
 
 	public void start() throws Exception {
+		if(mainServerThread != null) {
+			throw new Exception("Server already running...");
+		}
 		server=new ServerSocket(port);
 		server.setSoTimeout(10*1000);
 		threadpool=Executors.newFixedThreadPool(numOfClients);
+		
+		controller.display("Server is up, waiting for clients...");
 		
 		mainServerThread=new Thread(new Runnable() {			
 			@Override
@@ -47,9 +52,11 @@ public class ModelServer {
 							threadpool.execute(new Runnable() {									
 								@Override
 								public void run() {
-									try{										
+									try{
+										controller.display("Handling client...");
 										clientHandler.handleClient(someClient.getInputStream(), someClient.getOutputStream());
 										someClient.close();
+										controller.display("Done handling client");
 									}catch(IOException e){
 										controller.display(e.getMessage());
 									}									
@@ -64,7 +71,6 @@ public class ModelServer {
 						controller.display(e.getMessage());
 					}
 				}
-				controller.display("done accepting new clients.");
 			} // end of the mainServerThread task
 		});
 		
@@ -74,17 +80,14 @@ public class ModelServer {
 	public void stop() throws Exception {
 		stop=true;	
 		// do not execute jobs in queue, continue to execute running threads
-		controller.display("shutting down");
+		controller.display("shutting server down");
 		threadpool.shutdown();
 		// wait 10 seconds over and over again until all running jobs have finished
 		@SuppressWarnings("unused")
 		boolean allTasksCompleted=false;
 		while(!(allTasksCompleted=threadpool.awaitTermination(10, TimeUnit.SECONDS)));
 		
-		controller.display("all the tasks have finished");
-
 		mainServerThread.join();		
-		controller.display("main server thread is done");
 		
 		server.close();
 		controller.display("server is safely closed");
